@@ -11,6 +11,7 @@
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/Controller.h"
 #include "TimerManager.h"
+#include "Weapon/ShooterBaseWeapon.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogShooter, All, All)
@@ -38,8 +39,9 @@ AShooterBaseCharacter::AShooterBaseCharacter()
 void AShooterBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-    CurrentSpeed = 300.0f;
-    TargetSpeed = 300.0f;
+    CurrentSpeed = 160.0f;
+    TargetSpeed = 160.0f;
+    GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
     InterpSpeed = 4.0f;
     //ErrorTolerance = 1.0f;
 
@@ -54,17 +56,21 @@ void AShooterBaseCharacter::BeginPlay()
     HealthComponent->OnHealthChanged.AddUObject(this, &AShooterBaseCharacter::OnHealthChanged);
 
     LandedDelegate.AddDynamic(this, &AShooterBaseCharacter::OnGroundLanded);
+
+    SpawnWeapon();
 }
 
 
 void AShooterBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+    UE_LOG(LogShooter, Display, TEXT("Speed: %f"), CurrentSpeed);
     if (!(FMath::IsNearlyEqual(TargetSpeed, CurrentSpeed, 0.1)))
     {
         CurrentSpeed = FMath::FInterpTo(CurrentSpeed, TargetSpeed, DeltaTime, InterpSpeed);
         GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
-        //UE_LOG(LogShooter, Display, TEXT("Tick"));
+        //UE_LOG(LogShooter, Display, TEXT("Speed: %f"), CurrentSpeed);
     }
 }
 
@@ -84,7 +90,7 @@ void AShooterBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
     PlayerInputComponent->BindAxis("TurnAround", this, &AShooterBaseCharacter::AddControllerYawInput);
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AShooterBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &AShooterBaseCharacter::Run);
-    PlayerInputComponent->BindAction("Walk", IE_Released, this, &AShooterBaseCharacter::Walk);
+    PlayerInputComponent->BindAction("Run", IE_Released, this, &AShooterBaseCharacter::Walk);
 }
 
 float AShooterBaseCharacter::GetMovementDirection() const
@@ -112,7 +118,7 @@ void AShooterBaseCharacter::Run()
     if (!GetVelocity().IsZero())
     {
         UE_LOG(LogShooter, Display, TEXT("Run"));
-        TargetSpeed = 600.0f;
+        TargetSpeed = 300.0f;
         //GetCharacterMovement()->MaxWalkSpeed = 600;
     }
 }
@@ -120,7 +126,7 @@ void AShooterBaseCharacter::Run()
 void AShooterBaseCharacter::Walk() 
 {
     UE_LOG(LogShooter, Display, TEXT("Walk"));
-    TargetSpeed = 300.0f;
+    TargetSpeed = 160.0f;
     //GetCharacterMovement()->MaxWalkSpeed = 300;
 }
 
@@ -148,3 +154,16 @@ void AShooterBaseCharacter::OnGroundLanded(const FHitResult& Hit)
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
 
+void AShooterBaseCharacter::SpawnWeapon()
+{
+    if (!GetWorld()) return;
+    {
+        const auto Weapon = GetWorld()->SpawnActor<AShooterBaseWeapon>(WeaponClass);
+        if (Weapon)
+        {
+            FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
+            Weapon->AttachToComponent(GetMesh(), AttachmentRules, "weapon_rHandSocket");
+        }
+
+    }
+}

@@ -10,6 +10,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class UShooterHealthComponent;
 class UTextRenderComponent;
+class AShooterBaseWeapon;
 
 UCLASS()
 class SHOOTER_API AShooterBaseCharacter : public ACharacter
@@ -34,6 +35,7 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UTextRenderComponent* HealthTextComponent;
 
+
     UPROPERTY(EditDefaultsOnly, Category = "Animation|Montage")
     UAnimMontage* DeathAnimMontage;
 
@@ -42,6 +44,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Damage")
     FVector2D LandedDamage = FVector2D(20.0f, 100.0f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TSubclassOf<AShooterBaseWeapon> WeaponClass;
 
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
@@ -74,4 +79,6 @@ private:
 
     UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);
+
+    void SpawnWeapon();
 };
