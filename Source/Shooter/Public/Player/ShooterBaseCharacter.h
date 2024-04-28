@@ -48,6 +48,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<AShooterBaseWeapon> WeaponClass;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Settings|Movement")
+    float WalkSpeed = 250.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Settings|Movement")
+    float RunSpeed = 500.0f;
+
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
 

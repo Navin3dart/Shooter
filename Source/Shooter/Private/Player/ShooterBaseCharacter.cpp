@@ -39,8 +39,8 @@ AShooterBaseCharacter::AShooterBaseCharacter()
 void AShooterBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-    CurrentSpeed = 160.0f;
-    TargetSpeed = 160.0f;
+    CurrentSpeed = WalkSpeed;
+    TargetSpeed = WalkSpeed;
     GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
     InterpSpeed = 4.0f;
     //ErrorTolerance = 1.0f;
@@ -118,7 +118,7 @@ void AShooterBaseCharacter::Run()
     if (!GetVelocity().IsZero())
     {
         UE_LOG(LogShooter, Display, TEXT("Run"));
-        TargetSpeed = 300.0f;
+        TargetSpeed = RunSpeed;
         //GetCharacterMovement()->MaxWalkSpeed = 600;
     }
 }
@@ -126,7 +126,7 @@ void AShooterBaseCharacter::Run()
 void AShooterBaseCharacter::Walk() 
 {
     UE_LOG(LogShooter, Display, TEXT("Walk"));
-    TargetSpeed = 160.0f;
+    TargetSpeed = WalkSpeed;
     //GetCharacterMovement()->MaxWalkSpeed = 300;
 }
 
