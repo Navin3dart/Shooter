@@ -8,10 +8,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Component/ShooterHealthComponent.h"
+#include "component/ShooterWeaponComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/Controller.h"
 #include "TimerManager.h"
-#include "Weapon/ShooterBaseWeapon.h"
+#include "Components/CapsuleComponent.h"
+
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogShooter, All, All)
@@ -24,14 +26,18 @@ AShooterBaseCharacter::AShooterBaseCharacter()
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
     SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true;
+    SpringArmComponent->SocketOffset = FVector(0.0f, 100.0f, 80.0f);
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent);
 
     HealthComponent = CreateDefaultSubobject<UShooterHealthComponent>("HealthComponent");
 
+    WeaponComponent = CreateDefaultSubobject<UShooterWeaponComponent>("WeaponComponent");
+
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
     HealthTextComponent->SetupAttachment(GetRootComponent());
+    HealthTextComponent->SetOwnerNoSee(true);
 
 }
 
@@ -50,6 +56,7 @@ void AShooterBaseCharacter::BeginPlay()
     check(HealthComponent);
     check(HealthTextComponent);
     check(GetCharacterMovement());
+    check(WeaponComponent);
 
     OnHealthChanged(HealthComponent->GetHealth());
     HealthComponent->OnDeath.AddUObject(this, &AShooterBaseCharacter::OnDeath);
@@ -57,7 +64,6 @@ void AShooterBaseCharacter::BeginPlay()
 
     LandedDelegate.AddDynamic(this, &AShooterBaseCharacter::OnGroundLanded);
 
-    SpawnWeapon();
 }
 
 
@@ -65,7 +71,7 @@ void AShooterBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    UE_LOG(LogShooter, Display, TEXT("Speed: %f"), CurrentSpeed);
+   // UE_LOG(LogShooter, Display, TEXT("Speed: %f"), CurrentSpeed);
     if (!(FMath::IsNearlyEqual(TargetSpeed, CurrentSpeed, 0.1)))
     {
         CurrentSpeed = FMath::FInterpTo(CurrentSpeed, TargetSpeed, DeltaTime, InterpSpeed);
@@ -79,7 +85,6 @@ void AShooterBaseCharacter::OnHealthChanged(float Health)
     HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
 }
 
-// Called to bind functionality to input
 void AShooterBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -91,6 +96,11 @@ void AShooterBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AShooterBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &AShooterBaseCharacter::Run);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &AShooterBaseCharacter::Walk);
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::StartFire);
+    PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &UShooterWeaponComponent::StopFire);
+    PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::NextWeapon);
+    PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::Reload);
+
 }
 
 float AShooterBaseCharacter::GetMovementDirection() const
@@ -117,7 +127,7 @@ void AShooterBaseCharacter::Run()
 {
     if (!GetVelocity().IsZero())
     {
-        UE_LOG(LogShooter, Display, TEXT("Run"));
+        //UE_LOG(LogShooter, Display, TEXT("Run"));
         TargetSpeed = RunSpeed;
         //GetCharacterMovement()->MaxWalkSpeed = 600;
     }
@@ -125,7 +135,7 @@ void AShooterBaseCharacter::Run()
 
 void AShooterBaseCharacter::Walk() 
 {
-    UE_LOG(LogShooter, Display, TEXT("Walk"));
+    //UE_LOG(LogShooter, Display, TEXT("Walk"));
     TargetSpeed = WalkSpeed;
     //GetCharacterMovement()->MaxWalkSpeed = 300;
 }
@@ -136,34 +146,25 @@ void AShooterBaseCharacter::OnDeath()
 
     PlayAnimMontage(DeathAnimMontage);
     GetCharacterMovement()->DisableMovement();
+    SetLifeSpan(1.0f);
     if (Controller)
     {
         Controller->ChangeState(NAME_Spectating);
     }
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+    WeaponComponent->StopFire();
 }
 
 
 void AShooterBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 {
     const auto FallVelocityZ = -GetVelocity().Z;
-    UE_LOG(LogShooter, Display, TEXT("On landed: %f"), FallVelocityZ);
+    //UE_LOG(LogShooter, Display, TEXT("On landed: %f"), FallVelocityZ);
 
     if (FallVelocityZ < LandedDamageVelocity.X) return;
     const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
-    UE_LOG(LogShooter, Display, TEXT("FinalDamage: %f"), FinalDamage);
+    //UE_LOG(LogShooter, Display, TEXT("FinalDamage: %f"), FinalDamage);
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
 
-void AShooterBaseCharacter::SpawnWeapon()
-{
-    if (!GetWorld()) return;
-    {
-        const auto Weapon = GetWorld()->SpawnActor<AShooterBaseWeapon>(WeaponClass);
-        if (Weapon)
-        {
-            FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
-            Weapon->AttachToComponent(GetMesh(), AttachmentRules, "weapon_rHandSocket");
-        }
 
-    }
-}

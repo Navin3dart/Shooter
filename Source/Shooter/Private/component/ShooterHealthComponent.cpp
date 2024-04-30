@@ -38,7 +38,7 @@ void UShooterHealthComponent::TimerAutoHeal()
        {
            GetWorld()->GetTimerManager().ClearTimer(TimerHandleAutoHeal);
        }
-       UE_LOG(LogHealthComponent, Display, TEXT("Heal: %f"), Health);
+       //UE_LOG(LogHealthComponent, Display, TEXT("Heal: %f"), Health);
 }
 
 

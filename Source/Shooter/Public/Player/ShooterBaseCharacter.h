@@ -10,7 +10,8 @@ class UCameraComponent;
 class USpringArmComponent;
 class UShooterHealthComponent;
 class UTextRenderComponent;
-class AShooterBaseWeapon;
+class UShooterWeaponComponent;
+
 
 UCLASS()
 class SHOOTER_API AShooterBaseCharacter : public ACharacter
@@ -35,6 +36,8 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UTextRenderComponent* HealthTextComponent;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UShooterWeaponComponent* WeaponComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "Animation|Montage")
     UAnimMontage* DeathAnimMontage;
@@ -45,8 +48,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Damage")
     FVector2D LandedDamage = FVector2D(20.0f, 100.0f);
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<AShooterBaseWeapon> WeaponClass;
+
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings|Movement")
     float WalkSpeed = 250.0f;
@@ -86,5 +88,5 @@ private:
     UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);
 
-    void SpawnWeapon();
+
 };
