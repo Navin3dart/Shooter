@@ -7,11 +7,7 @@
 
 float UShooterPlayerHUDWidget::GetHealthPercent() const
 {
-    const auto Player = GetOwningPlayerPawn();
-    if (!Player) return 0.0f;
-
-    const auto Component = Player->GetComponentByClass(UShooterHealthComponent::StaticClass());
-    const auto HealthComponent = Cast<UShooterHealthComponent>(Component);
+    const auto HealthComponent = GetHealthComponent();
     if (!HealthComponent) return 0.0f;
 
     return HealthComponent->GetHealthPercent();
@@ -28,3 +24,47 @@ bool UShooterPlayerHUDWidget::GetWeaponUIData(FWeaponUIData& UIData) const
 
     return WeaponComponent->GetWeaponUIData(UIData);
 }
+
+bool UShooterPlayerHUDWidget::GetWeaponAmmoData(FAmmoData& AmmoData) const
+{
+    const auto Player = GetOwningPlayerPawn();
+    if (!Player) return false;
+
+    const auto Component = Player->GetComponentByClass(UShooterWeaponComponent::StaticClass());
+    const auto WeaponComponent = Cast<UShooterWeaponComponent>(Component);
+    if (!WeaponComponent) return false;
+
+    return WeaponComponent->GetWeaponAmmoData(AmmoData);
+}
+
+bool UShooterPlayerHUDWidget::IsPlayerAlive() const
+{
+    const auto HealthComponent = GetHealthComponent();
+    return HealthComponent && !HealthComponent->IsDead();
+}
+
+bool UShooterPlayerHUDWidget::IsPlayerSpectating() const
+{
+    const auto Controller = GetOwningPlayer();
+    return Controller && Controller->GetStateName() == NAME_Spectating;
+}
+
+UShooterHealthComponent* UShooterPlayerHUDWidget::GetHealthComponent() const
+{
+    const auto Player = GetOwningPlayerPawn();
+    if (!Player) return nullptr;
+
+    const auto Component = Player->GetComponentByClass(UShooterHealthComponent::StaticClass());
+    const auto HealthComponent = Cast<UShooterHealthComponent>(Component);
+
+    return HealthComponent;
+}
+
+
+
+
+
+
+
+
+

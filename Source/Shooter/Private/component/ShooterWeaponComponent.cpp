@@ -121,6 +121,16 @@ bool UShooterWeaponComponent::GetWeaponUIData(FWeaponUIData& UIData) const
     return false;
 }
 
+bool UShooterWeaponComponent::GetWeaponAmmoData(FAmmoData& AmmoData) const
+{
+    if (CurrentWeapon)
+    {
+        AmmoData = CurrentWeapon->GetAmmoData();
+        return true;
+    }
+    return false;
+}
+
 
 
 void UShooterWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)

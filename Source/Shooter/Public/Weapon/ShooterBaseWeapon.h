@@ -57,6 +57,8 @@ public:
 
     FWeaponUIData GetUIData() const { return UIData; }
 
+    FAmmoData GetAmmoData() const { return CurrentAmmo; }
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
@@ -81,9 +83,9 @@ protected:
 
     bool IsShot;
 
+    FAmmoData CurrentAmmo;
 
-
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
 	virtual void MakeShot();
 
@@ -91,17 +93,18 @@ protected:
 
     bool GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
     bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+  
 
     FVector GetMuzzleWorldLocation() const;
 
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
-
+    
     void DecreaseAmmo();
     bool IsAmmoEmpty() const;
     bool IsClipEmpty() const;
     void LogAmmo();
 
 private:
-    FAmmoData CurrentAmmo;
+    //FAmmoData CurrentAmmo;
 
 };

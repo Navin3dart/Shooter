@@ -16,6 +16,7 @@ AShooterBaseWeapon::AShooterBaseWeapon()
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
     SetRootComponent(WeaponMesh);
 }
+
 void AShooterBaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
