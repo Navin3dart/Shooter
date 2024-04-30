@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Weapon/ShooterBaseWeapon.h"
 #include "ShooterWeaponComponent.generated.h"
 
 class AShooterBaseWeapon;
@@ -33,6 +34,8 @@ public:
     void StopFire();
     void NextWeapon();
     void Reload();
+
+    bool GetWeaponUIData(FWeaponUIData& UIData) const;
 
 protected:
 

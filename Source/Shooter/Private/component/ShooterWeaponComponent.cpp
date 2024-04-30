@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "Animations/ShooterEquipFinishedAnimNotify.h"
 #include "Animations/ShooterReloadFinishedAnimNotify.h"
+#include "Weapon/ShooterBaseWeapon.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All)
 
@@ -109,6 +110,18 @@ void UShooterWeaponComponent::Reload()
 {
     ChangeClip();
 }
+
+bool UShooterWeaponComponent::GetWeaponUIData(FWeaponUIData& UIData) const
+{
+    if (CurrentWeapon)
+    {
+        UIData = CurrentWeapon->GetUIData();
+        return true;
+    }
+    return false;
+}
+
+
 
 void UShooterWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 {

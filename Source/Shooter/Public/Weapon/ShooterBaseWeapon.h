@@ -26,6 +26,18 @@ struct FAmmoData
     bool Infinite;
 };
 
+USTRUCT(BlueprintType)
+struct FWeaponUIData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    UTexture2D* MainIcon;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    UTexture2D* CrossHairIcon;
+};
+
 UCLASS()
 class SHOOTER_API AShooterBaseWeapon : public AActor
 {
@@ -42,6 +54,8 @@ public:
     void ChangeClip();
 
     bool CanReload() const;
+
+    FWeaponUIData GetUIData() const { return UIData; }
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -61,6 +75,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     FAmmoData DefaultAmmo{15, 10, false};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon|UI")
+    FWeaponUIData UIData;
 
     bool IsShot;
 
