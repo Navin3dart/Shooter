@@ -15,6 +15,13 @@ UShooterHealthComponent::UShooterHealthComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+bool UShooterHealthComponent::AddHealth(int32 HealthAmount)
+{
+    if (Health == MaxHealth) return false;
+    Health = FMath::Clamp(Health + HealthAmount, 0, MaxHealth);
+    return true;
+}
+
 void UShooterHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();

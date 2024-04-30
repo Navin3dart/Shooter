@@ -120,12 +120,33 @@ bool AShooterBaseWeapon::CanReload() const
     return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
 }
 
+bool AShooterBaseWeapon::TryToAddAmmo(int32 ClipsAmount)
+{
+    if(CurrentAmmo.Infinite || IsAmmoFull() || ClipsAmount <= 0) return false;
+
+    if (IsAmmoEmpty())
+    {
+        CurrentAmmo.Clips = FMath::Clamp(ClipsAmount, 0, DefaultAmmo.Clips + 1);
+        OnClipEmpty.Broadcast();
+    }
+    else if (CurrentAmmo.Clips < DefaultAmmo.Clips)
+    {
+        CurrentAmmo.Clips = CurrentAmmo.Clips + ClipsAmount;
+    }
+    return true;
+}
+
 void AShooterBaseWeapon::LogAmmo() 
 {
     FString AmmoInfo = "Ammo:" + FString::FromInt(CurrentAmmo.Bullets) + " / ";
     AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
 
     UE_LOG(LogBaseWeapon, Display, TEXT ("%s"), *AmmoInfo);
+}
+
+bool AShooterBaseWeapon::IsAmmoFull()
+{
+    return CurrentAmmo.Clips == DefaultAmmo.Clips;
 }
 
 void AShooterBaseWeapon::StartFire()

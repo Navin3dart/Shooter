@@ -38,6 +38,8 @@ public:
     bool GetWeaponUIData(FWeaponUIData& UIData) const;
     bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
 
+    bool TryToAddAmmo(TSubclassOf<AShooterBaseWeapon> WeaponType, int32 ClipsAmount);
+
 protected:
 
 	virtual void BeginPlay() override;

@@ -131,6 +131,18 @@ bool UShooterWeaponComponent::GetWeaponAmmoData(FAmmoData& AmmoData) const
     return false;
 }
 
+bool UShooterWeaponComponent::TryToAddAmmo(TSubclassOf<AShooterBaseWeapon> WeaponType, int32 ClipsAmount)
+{
+    for (const auto Weapon : Weapons)
+    {
+        if (Weapon && Weapon->IsA(WeaponType))
+        {
+            return Weapon->TryToAddAmmo(ClipsAmount);
+        }
+    }
+    return false;
+}
+
 
 
 void UShooterWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)

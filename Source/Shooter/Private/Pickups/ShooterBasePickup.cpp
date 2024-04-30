@@ -21,14 +21,21 @@ AShooterBasePickup::AShooterBasePickup()
 void AShooterBasePickup::BeginPlay()
 {
 	Super::BeginPlay();
+
+    check(CollisionComponent);
 	
 }
 
 void AShooterBasePickup::NotifyActorBeginOverlap(AActor* OtherActor) 
 {
     Super::NotifyActorBeginOverlap(OtherActor);
-    UE_LOG(LogBasePickup, Display, TEXT("Pickup!"));
-    Destroy();
+
+    const auto Pawn = Cast<APawn>(OtherActor);
+    if (GivePickupTo(Pawn))
+    {
+        PickupWasTaken();
+    }
+    //UE_LOG(LogBasePickup, Display, TEXT("Pickup!"));
 }
 
 
@@ -36,5 +43,25 @@ void AShooterBasePickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+bool AShooterBasePickup::GivePickupTo(APawn* PlayerPawn)
+{
+    return false;
+}
+
+void AShooterBasePickup::PickupWasTaken()
+{
+    CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+    GetRootComponent()->SetVisibility(false, true);
+
+    FTimerHandle RespawnTimerHandle;
+    GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &AShooterBasePickup::Respawn, RespawnTime);
+}
+
+void AShooterBasePickup::Respawn() 
+{
+    CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+    GetRootComponent()->SetVisibility(true, true);
 }
 
