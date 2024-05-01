@@ -6,9 +6,14 @@
 #include "DrawDebugHelpers.h"
 #include "GameFramework//Character.h"
 #include "GameFramework/Controller.h"
-
+#include "component/ShooterWeaponVFXComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapons, All, All);
+
+AShooterRifleWeapon::AShooterRifleWeapon() 
+{
+    ShooterVFXComponent = CreateDefaultSubobject<UShooterWeaponVFXComponent>("ShooterWeaponComponent");
+}
 
 void AShooterRifleWeapon::StartFire()
 {
@@ -19,6 +24,12 @@ void AShooterRifleWeapon::StartFire()
 void AShooterRifleWeapon::StopFire()
 {
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
+}
+
+void AShooterRifleWeapon::BeginPlay() 
+{
+    Super::BeginPlay();
+    check(ShooterVFXComponent);
 }
 
 void AShooterRifleWeapon::MakeShot()
@@ -42,14 +53,15 @@ void AShooterRifleWeapon::MakeShot()
     if (HitResult.bBlockingHit)
     {
         if (!IsShot) return;
-        DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
-        DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
-
+        //DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
+        //DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
         HitResult.GetActor()->TakeDamage(WeaponDamage, FDamageEvent{}, GetPlayerController(), this);
+
+        ShooterVFXComponent->PlayImpactVFX(HitResult);
     }
     else
     {
-        DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
+        //DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
     }
     DecreaseAmmo();
 }

@@ -26,12 +26,12 @@ void UShooterWeaponComponent::BeginPlay()
 void UShooterWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     CurrentWeapon = nullptr;
-    for (auto Weapon : Weapons)
-    {
-        Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+    //for (auto Weapon : Weapons)
+    //{
+      //  Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
         // Weapon->Destroy();
-        Weapon->GetActorEnableCollision();
-    }
+      //  Weapon->GetActorEnableCollision();
+    //}
     Weapons.Empty();
     Super::EndPlay(EndPlayReason);
 }
@@ -59,6 +59,15 @@ void UShooterWeaponComponent::AttachWeaponToSocket(AShooterBaseWeapon* Weapon, U
     if (!Weapon || !SceneComponent) return;
     FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
     Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
+}
+
+void UShooterWeaponComponent::DetachWeapons() 
+{
+    for (auto Weapon : Weapons)
+    {
+        Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        Weapon->SimulatePhysics();
+    }
 }
 
 void UShooterWeaponComponent::EquipWeapon(int32 WeaponIndex)
@@ -142,8 +151,6 @@ bool UShooterWeaponComponent::TryToAddAmmo(TSubclassOf<AShooterBaseWeapon> Weapo
     }
     return false;
 }
-
-
 
 void UShooterWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 {

@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class UShooterWeaponVFXComponent;
 
 UCLASS()
 class SHOOTER_API AShooterProjectile : public AActor
@@ -39,6 +40,9 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Damage");
     float LifeSeconds = 5.0f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+    UShooterWeaponVFXComponent* ShooterVFXComponent;
 
 private:
     FVector ShotDirection;

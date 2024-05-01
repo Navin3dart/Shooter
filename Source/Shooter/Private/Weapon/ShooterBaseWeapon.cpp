@@ -15,6 +15,7 @@ AShooterBaseWeapon::AShooterBaseWeapon()
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
     SetRootComponent(WeaponMesh);
+
 }
 
 void AShooterBaseWeapon::BeginPlay()
@@ -66,6 +67,7 @@ void AShooterBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStar
 
     FCollisionQueryParams CollisionParams;
     CollisionParams.AddIgnoredActor(GetOwner());
+    CollisionParams.bReturnPhysicalMaterial = true;
 
     GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 
@@ -115,6 +117,14 @@ void AShooterBaseWeapon::ChangeClip()
     UE_LOG(LogBaseWeapon, Display, TEXT ("---------Change Clip--------"));
 }
 
+void AShooterBaseWeapon::SimulatePhysics() 
+{
+    UE_LOG(LogBaseWeapon, Display, TEXT("Coll!"));
+    WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    WeaponMesh->SetSimulatePhysics(true);
+    GetWorldTimerManager().SetTimer(CollisionHandle, this, &AShooterBaseWeapon::DisableCollision, 0.1f, false, 4.0f);
+}
+
 bool AShooterBaseWeapon::CanReload() const
 {
     return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
@@ -147,6 +157,12 @@ void AShooterBaseWeapon::LogAmmo()
 bool AShooterBaseWeapon::IsAmmoFull()
 {
     return CurrentAmmo.Clips == DefaultAmmo.Clips;
+}
+
+void AShooterBaseWeapon::DisableCollision() 
+{
+    WeaponMesh->SetSimulatePhysics(false);
+    WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AShooterBaseWeapon::StartFire()

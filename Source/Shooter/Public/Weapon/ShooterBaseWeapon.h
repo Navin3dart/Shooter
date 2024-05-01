@@ -52,6 +52,7 @@ public:
     virtual void StopFire();
 
     void ChangeClip();
+    void SimulatePhysics();
 
     bool CanReload() const;
 
@@ -60,6 +61,7 @@ public:
     FAmmoData GetAmmoData() const { return CurrentAmmo; }
 
     bool TryToAddAmmo(int32 ClipsAmount);
+
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -106,8 +108,10 @@ protected:
     bool IsClipEmpty() const;
     void LogAmmo();
     bool IsAmmoFull();
+    void DisableCollision();
 
 private:
     //FAmmoData CurrentAmmo;
+    FTimerHandle CollisionHandle;
 
 };

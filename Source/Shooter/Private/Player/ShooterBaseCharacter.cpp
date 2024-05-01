@@ -41,7 +41,6 @@ AShooterBaseCharacter::AShooterBaseCharacter()
 
 }
 
-
 void AShooterBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -57,6 +56,7 @@ void AShooterBaseCharacter::BeginPlay()
     check(HealthTextComponent);
     check(GetCharacterMovement());
     check(WeaponComponent);
+    check(GetMesh());
 
     OnHealthChanged(HealthComponent->GetHealth());
     HealthComponent->OnDeath.AddUObject(this, &AShooterBaseCharacter::OnDeath);
@@ -65,7 +65,6 @@ void AShooterBaseCharacter::BeginPlay()
     LandedDelegate.AddDynamic(this, &AShooterBaseCharacter::OnGroundLanded);
 
 }
-
 
 void AShooterBaseCharacter::Tick(float DeltaTime)
 {
@@ -144,17 +143,20 @@ void AShooterBaseCharacter::OnDeath()
 {
     UE_LOG(LogShooter, Display, TEXT("Player %s is dead"), *GetName());
 
-    PlayAnimMontage(DeathAnimMontage);
+    //PlayAnimMontage(DeathAnimMontage);
     GetCharacterMovement()->DisableMovement();
-    SetLifeSpan(1.0f);
+    //SetLifeSpan(1.0f);
     if (Controller)
     {
         Controller->ChangeState(NAME_Spectating);
     }
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
     WeaponComponent->StopFire();
-}
+    WeaponComponent->DetachWeapons();
 
+    GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    GetMesh()->SetSimulatePhysics(true);
+}
 
 void AShooterBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 {

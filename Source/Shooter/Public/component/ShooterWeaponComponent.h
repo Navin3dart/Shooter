@@ -34,6 +34,7 @@ public:
     void StopFire();
     void NextWeapon();
     void Reload();
+    void DetachWeapons();
 
     bool GetWeaponUIData(FWeaponUIData& UIData) const;
     bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
@@ -74,6 +75,7 @@ private:
 
     void SpawnWeapons();
     void AttachWeaponToSocket(AShooterBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
+
     void EquipWeapon(int32 WeaponIndex);
 
     void PlayAnimMontage(UAnimMontage* Animation);

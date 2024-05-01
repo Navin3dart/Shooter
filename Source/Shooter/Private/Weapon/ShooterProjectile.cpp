@@ -5,6 +5,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "component/ShooterWeaponVFXComponent.h"
 
 AShooterProjectile::AShooterProjectile()
 {
@@ -14,10 +15,13 @@ AShooterProjectile::AShooterProjectile()
     CollisionComponent->InitSphereRadius(5.0f);
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+    CollisionComponent->bReturnMaterialOnMove = true;
     SetRootComponent(CollisionComponent);
 
     MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
     MovementComponent->InitialSpeed = 2000.0f;
+
+    ShooterVFXComponent = CreateDefaultSubobject<UShooterWeaponVFXComponent>("ShooterWeaponComponent");
 }
 
 void AShooterProjectile::BeginPlay()
@@ -26,6 +30,7 @@ void AShooterProjectile::BeginPlay()
 
     check(MovementComponent);
     check(CollisionComponent);
+    check(ShooterVFXComponent);
 
     MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
     CollisionComponent->OnComponentHit.AddDynamic(this, &AShooterProjectile::OnProjectileHit);
@@ -52,7 +57,7 @@ void AShooterProjectile::OnProjectileHit(
         DoFullDamage);
 
     DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 32, FColor::Red, false, 5.0f);
-
+    ShooterVFXComponent->PlayImpactVFX(Hit);
     Destroy();
 }
 
