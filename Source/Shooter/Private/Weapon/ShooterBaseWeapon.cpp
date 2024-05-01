@@ -6,6 +6,9 @@
 #include "DrawDebugHelpers.h"
 #include "GameFramework//Character.h"
 #include "GameFramework/Controller.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
@@ -163,6 +166,17 @@ void AShooterBaseWeapon::DisableCollision()
 {
     WeaponMesh->SetSimulatePhysics(false);
     WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+UNiagaraComponent* AShooterBaseWeapon::SpawnMuzzleVFX()
+{
+    return UNiagaraFunctionLibrary::SpawnSystemAttached(MuzzleVFX,  //
+        WeaponMesh,                                          //
+        MuzzleSocketName,                                    //
+        FVector::ZeroVector,                                 //
+        FRotator::ZeroRotator,                               //
+        EAttachLocation::SnapToTarget,                       //
+        true);
 }
 
 void AShooterBaseWeapon::StartFire()

@@ -3,10 +3,14 @@
 
 #include "Component/ShooterHealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Controller.h"
 #include "Dev/ShooterEMIDamageType.h"
 #include "Dev/ShooterFireDamageType.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Camera/CameraShakeBase.h"
+
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All)
 
@@ -71,6 +75,8 @@ void UShooterHealthComponent::OnTakeAnyDamageHandle(
             TimerHandleAutoHeal, this, &UShooterHealthComponent::TimerAutoHeal, TimerRate, true, DelayHealStart);
     }
 
+    PlayCameraShake();
+
     //UE_LOG(LogHealthComponent, Display, TEXT("Damage: %f"), Damage);
 
 	if (DamageType)
@@ -90,4 +96,15 @@ void UShooterHealthComponent::SetHealth(float NewHealth)
 {
     Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(Health);
+}
+
+void UShooterHealthComponent::PlayCameraShake()
+{
+    const auto Player = Cast<APawn>(GetOwner());
+    if (!Player) return;
+
+    const auto Controller = Player->GetController<APlayerController>();
+    if (!Controller || !Controller->PlayerCameraManager) return;
+
+    Controller->PlayerCameraManager->StartCameraShake(CameraShake);
 }

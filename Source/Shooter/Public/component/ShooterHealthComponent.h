@@ -9,6 +9,8 @@
 DECLARE_MULTICAST_DELEGATE(FOnDeath);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float);
 
+class UCameraShakeBase;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SHOOTER_API UShooterHealthComponent : public UActorComponent
 {
@@ -49,6 +51,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Health|AutoHeal", meta = (EditCondition = "UseAutoHeal"))
     float TimerRate = 5.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|CameraShake", meta = (EditCondition = "UseAutoHeal"))
+    TSubclassOf<UCameraShakeBase> CameraShake;
 
 	private:
 
@@ -58,6 +62,8 @@ protected:
 
 	void TimerAutoHeal();
     void SetHealth(float NewHealth);
+
+	void PlayCameraShake();
 
 	UFUNCTION()
     void OnTakeAnyDamageHandle(

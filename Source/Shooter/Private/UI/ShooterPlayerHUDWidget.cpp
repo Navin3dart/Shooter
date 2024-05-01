@@ -5,6 +5,8 @@
 #include "component/ShooterWeaponComponent.h"
 #include "component/ShooterHealthComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogWidget, All, All)
+
 float UShooterPlayerHUDWidget::GetHealthPercent() const
 {
     const auto HealthComponent = GetHealthComponent();
@@ -49,6 +51,16 @@ bool UShooterPlayerHUDWidget::IsPlayerSpectating() const
     return Controller && Controller->GetStateName() == NAME_Spectating;
 }
 
+bool UShooterPlayerHUDWidget::Initialize()
+{
+    const auto HealthComponent = GetHealthComponent();
+    if (HealthComponent)
+    {
+        HealthComponent->OnHealthChanged.AddUObject(this, &UShooterPlayerHUDWidget::OnHealthChanged);
+    }
+    return Super::Initialize();
+}
+
 UShooterHealthComponent* UShooterPlayerHUDWidget::GetHealthComponent() const
 {
     const auto Player = GetOwningPlayerPawn();
@@ -58,6 +70,11 @@ UShooterHealthComponent* UShooterPlayerHUDWidget::GetHealthComponent() const
     const auto HealthComponent = Cast<UShooterHealthComponent>(Component);
 
     return HealthComponent;
+}
+
+void UShooterPlayerHUDWidget::OnHealthChanged(float Health) 
+{
+    OnTakeDamage();
 }
 
 

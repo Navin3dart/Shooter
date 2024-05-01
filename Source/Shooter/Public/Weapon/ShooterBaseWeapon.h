@@ -10,6 +10,8 @@
 DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
 
 class USkeletalMeshComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 USTRUCT(BlueprintType)
 struct FAmmoData
@@ -85,6 +87,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon|UI")
     FWeaponUIData UIData;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon|VFX")
+    UNiagaraSystem* MuzzleVFX;
+
     bool IsShot;
 
     FAmmoData CurrentAmmo;
@@ -110,8 +115,12 @@ protected:
     bool IsAmmoFull();
     void DisableCollision();
 
+    UNiagaraComponent* SpawnMuzzleVFX();
+
 private:
     //FAmmoData CurrentAmmo;
     FTimerHandle CollisionHandle;
+
+
 
 };

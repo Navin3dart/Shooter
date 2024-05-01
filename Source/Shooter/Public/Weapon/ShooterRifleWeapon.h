@@ -7,6 +7,8 @@
 #include "ShooterRifleWeapon.generated.h"
 
 class UShooterWeaponVFXComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class SHOOTER_API AShooterRifleWeapon : public AShooterBaseWeapon
@@ -37,6 +39,10 @@ protected:
 private:
     FTimerHandle ShotTimerHandle;
 
+    UPROPERTY()
+    UNiagaraComponent* MuzzleVFXComponent;
 
+    void InitMuzzleVFX();
+    void SetMuzzleVFXVisibility(bool Visibility);
 
 };

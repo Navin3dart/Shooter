@@ -7,6 +7,7 @@
 #include "GameFramework//Character.h"
 #include "GameFramework/Controller.h"
 #include "component/ShooterWeaponVFXComponent.h"
+#include "NiagaraComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapons, All, All);
 
@@ -17,12 +18,14 @@ AShooterRifleWeapon::AShooterRifleWeapon()
 
 void AShooterRifleWeapon::StartFire()
 {
+    InitMuzzleVFX();
     GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &AShooterRifleWeapon::MakeShot, TimeBetweenShots, true);
     MakeShot();
 }
 
 void AShooterRifleWeapon::StopFire()
 {
+    SetMuzzleVFXVisibility(false);
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }
 
@@ -64,4 +67,23 @@ void AShooterRifleWeapon::MakeShot()
         //DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
     }
     DecreaseAmmo();
+}
+
+void AShooterRifleWeapon::InitMuzzleVFX() 
+{
+    if (!MuzzleVFXComponent)
+    {
+        MuzzleVFXComponent = SpawnMuzzleVFX();
+        MuzzleVFXComponent->SetFloatParameter("Rate", TimeBetweenShots);
+    }
+    SetMuzzleVFXVisibility(true);
+}
+
+void AShooterRifleWeapon::SetMuzzleVFXVisibility(bool Visibility) 
+{
+    if (MuzzleVFXComponent)
+    {
+        MuzzleVFXComponent->SetPaused(!Visibility);
+        MuzzleVFXComponent->SetVisibility(Visibility, true);
+    }
 }
