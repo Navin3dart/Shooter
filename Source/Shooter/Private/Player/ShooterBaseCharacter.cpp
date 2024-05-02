@@ -19,7 +19,7 @@
 DEFINE_LOG_CATEGORY_STATIC(LogShooter, All, All)
 
 
-AShooterBaseCharacter::AShooterBaseCharacter()
+AShooterBaseCharacter::AShooterBaseCharacter(const FObjectInitializer& ObjInit)
 {
  	PrimaryActorTick.bCanEverTick = true;
 

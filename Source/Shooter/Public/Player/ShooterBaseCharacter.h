@@ -20,7 +20,7 @@ class SHOOTER_API AShooterBaseCharacter : public ACharacter
 
 public:
     // Sets default values for this character's properties
-    AShooterBaseCharacter();
+    AShooterBaseCharacter(const FObjectInitializer& ObjInit);
 
 protected:
 
