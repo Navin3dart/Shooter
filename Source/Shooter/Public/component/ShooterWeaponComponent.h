@@ -30,9 +30,9 @@ class SHOOTER_API UShooterWeaponComponent : public UActorComponent
 public:	
 	UShooterWeaponComponent();
 
-	void StartFire();
+	virtual void StartFire();
     void StopFire();
-    void NextWeapon();
+    virtual void NextWeapon();
     void Reload();
     void DetachWeapons();
 
@@ -58,33 +58,37 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon|Animation")
     UAnimMontage* EquipAnimMontage;
 
-private:
-
-	UPROPERTY()
+    UPROPERTY()
     AShooterBaseWeapon* CurrentWeapon = nullptr;
 
-	UPROPERTY()
+    UPROPERTY()
     TArray<AShooterBaseWeapon*> Weapons;
+
+    bool CanFire() const;
+    bool CanEquip() const;
+    void EquipWeapon(int32 WeaponIndex);
+
+    int32 CurrentWeaponIndex = 0;
+
+private:
+
+
 
     UPROPERTY()
     UAnimMontage* CurrentReloadAnimMontage = nullptr;
 
-	int32 CurrentWeaponIndex = 0;
+
     bool EqipAnimInProgress = false;
     bool ReloadAnimInProgress = false;
 
     void SpawnWeapons();
     void AttachWeaponToSocket(AShooterBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
 
-    void EquipWeapon(int32 WeaponIndex);
-
     void PlayAnimMontage(UAnimMontage* Animation);
     void InitAnimations();
     void OnEquipFinished(USkeletalMeshComponent* MeshComponent);
     void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
 
-    bool CanFire() const;
-    bool CanEquip() const;
     bool CanReload() const;
 
     void OnEmptyClip();

@@ -33,7 +33,6 @@ void AShooterAIController::Tick(float DeltaTime)
 
 AActor* AShooterAIController::GetFocusOnActor() const
 {
-    //UE_LOG(LogAIController, Display, TEXT("Start"));
     if (!GetBlackboardComponent()) return nullptr;
     return Cast<AActor>(GetBlackboardComponent()->GetValueAsObject(FocusOnKeyName));
 

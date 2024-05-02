@@ -24,10 +24,6 @@ void UFindEnemyService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
         {
             Blackboard->SetValueAsObject(EnemyActorKey.SelectedKeyName, PerceprionComponent->GetClosestEnemy());
         }
-
     }
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-
-
-
 }
