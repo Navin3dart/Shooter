@@ -35,6 +35,8 @@ public:
     virtual void NextWeapon();
     void Reload();
     void DetachWeapons();
+    void StartAiming();
+    void EndAiming();
 
     bool GetWeaponUIData(FWeaponUIData& UIData) const;
     bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
@@ -44,6 +46,10 @@ public:
 
     UPROPERTY()
     AShooterBaseWeapon* CurrentWeapon = nullptr;
+
+    UFUNCTION(Category = "Weapon")
+    FVector GetMuzzleWorldLocation() const;
+
 
 protected:
 
@@ -62,14 +68,14 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon|Animation")
     UAnimMontage* EquipAnimMontage;
 
-
-
     UPROPERTY()
     TArray<AShooterBaseWeapon*> Weapons;
 
     bool CanFire() const;
     bool CanEquip() const;
     void EquipWeapon(int32 WeaponIndex);
+
+
 
     int32 CurrentWeaponIndex = 0;
 

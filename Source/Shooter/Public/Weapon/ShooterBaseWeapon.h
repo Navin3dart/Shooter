@@ -76,6 +76,8 @@ public:
 
     void ChangeClip();
     void SimulatePhysics();
+    void StartAiming();
+    void EndAiming();
 
     bool CanReload() const;
 
@@ -89,6 +91,7 @@ public:
     bool IsAmmoEmpty() const;
 
     virtual void Tick(float DeltaTime) override;
+    FVector GetMuzzleWorldLocation() const;
 
 
 protected:
@@ -131,7 +134,7 @@ protected:
     bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
   
 
-    FVector GetMuzzleWorldLocation() const;
+
 
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
     

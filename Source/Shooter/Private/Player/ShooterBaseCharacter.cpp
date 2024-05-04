@@ -48,9 +48,6 @@ void AShooterBaseCharacter::BeginPlay()
     TargetSpeed = WalkSpeed;
     GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
     InterpSpeed = 4.0f;
-    //ErrorTolerance = 1.0f;
-
-    //GetWorldTimerManager().SetTimer(TimerHandleAutoHeal, this, &UShooterHealthComponent::TimerAutoHeal, TimerRate, true);
 
     check(HealthComponent);
     check(HealthTextComponent);
@@ -70,12 +67,10 @@ void AShooterBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-   // UE_LOG(LogShooter, Display, TEXT("Speed: %f"), CurrentSpeed);
     if (!(FMath::IsNearlyEqual(TargetSpeed, CurrentSpeed, 0.1)))
     {
         CurrentSpeed = FMath::FInterpTo(CurrentSpeed, TargetSpeed, DeltaTime, InterpSpeed);
         GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
-        //UE_LOG(LogShooter, Display, TEXT("Speed: %f"), CurrentSpeed);
     }
 }
 
@@ -99,6 +94,8 @@ void AShooterBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &UShooterWeaponComponent::StopFire);
     PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::NextWeapon);
     PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::Reload);
+    PlayerInputComponent->BindAction("Aiming", IE_Released, this, &AShooterBaseCharacter::EndAiming);
+    PlayerInputComponent->BindAction("Aiming", IE_Pressed, this, &AShooterBaseCharacter::StartAiming);
 
 }
 
@@ -110,6 +107,12 @@ float AShooterBaseCharacter::GetMovementDirection() const
     const auto CrossProduct = FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
     const auto Degrees = FMath::RadiansToDegrees(AngleBetween);
     return CrossProduct.IsZero() ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
+}
+
+FVector AShooterBaseCharacter::GetMuzzleSoketLocation() const
+{
+    if (!WeaponComponent) return FVector::ZeroVector;
+    return WeaponComponent->GetMuzzleWorldLocation();
 }
 
 void AShooterBaseCharacter::MoveForward(float Amount) 
@@ -139,6 +142,18 @@ void AShooterBaseCharacter::Walk()
     //GetCharacterMovement()->MaxWalkSpeed = 300;
 }
 
+void AShooterBaseCharacter::StartAiming() 
+{
+    WeaponComponent->StartAiming();
+    SpringArmComponent->TargetArmLength = 100;
+}
+
+void AShooterBaseCharacter::EndAiming() 
+{
+    WeaponComponent->EndAiming();
+    SpringArmComponent->TargetArmLength = 600;
+}
+
 void AShooterBaseCharacter::OnDeath()
 {
     UE_LOG(LogShooter, Display, TEXT("Player %s is dead"), *GetName());
@@ -161,11 +176,9 @@ void AShooterBaseCharacter::OnDeath()
 void AShooterBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 {
     const auto FallVelocityZ = -GetVelocity().Z;
-    //UE_LOG(LogShooter, Display, TEXT("On landed: %f"), FallVelocityZ);
 
     if (FallVelocityZ < LandedDamageVelocity.X) return;
     const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
-    //UE_LOG(LogShooter, Display, TEXT("FinalDamage: %f"), FinalDamage);
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
 

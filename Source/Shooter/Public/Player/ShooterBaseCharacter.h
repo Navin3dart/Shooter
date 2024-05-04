@@ -19,7 +19,7 @@ class SHOOTER_API AShooterBaseCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
-    // Sets default values for this character's properties
+
     AShooterBaseCharacter(const FObjectInitializer& ObjInit);
 
 protected:
@@ -56,19 +56,19 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Settings|Movement")
     float RunSpeed = 500.0f;
 
-    // Called when the game starts or when spawned
     virtual void BeginPlay() override;
     virtual void OnDeath();
 
 public:
-    // Called every frame
     virtual void Tick(float DeltaTime) override;
 
-    // Called to bind functionality to input
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     UFUNCTION(BlueprintCallable, Category = "Movement")
     float GetMovementDirection() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    FVector GetMuzzleSoketLocation() const;
 
 
 
@@ -82,6 +82,8 @@ private:
     void MoveRight(float Amount);
     void Run();
     void Walk();
+    void StartAiming();
+    void EndAiming();
 
     void OnHealthChanged(float Health);
 

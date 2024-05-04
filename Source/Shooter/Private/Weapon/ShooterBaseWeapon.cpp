@@ -89,7 +89,7 @@ void AShooterBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStar
 
     if (IsShot)
     {
-        SpreadData.CurrentSpread = FMath::Clamp(SpreadData.CurrentSpread + SpreadData.DeltaSpread, //
+        SpreadData.CurrentSpread = FMath::Clamp(SpreadData.CurrentSpread + SpreadData.DeltaSpread,  //
             SpreadData.MinSpread, SpreadData.MaxSpread);
     }
 }
@@ -118,13 +118,13 @@ bool AShooterBaseWeapon::IsAmmoEmpty() const
 
 void AShooterBaseWeapon::Tick(float DeltaTime)
 {
-    //UE_LOG(LogBaseWeapon, Display, TEXT("%f"), SpreadData.CurrentSpread);
+    // UE_LOG(LogBaseWeapon, Display, TEXT("%f"), SpreadData.CurrentSpread);
     if (!(FMath::IsNearlyEqual(SpreadData.CurrentSpread, SpreadData.MinSpread, 0.001)) && !IsShooting)
     {
-            SpreadData.CurrentSpread = FMath::FInterpTo(SpreadData.CurrentSpread,  //
-                SpreadData.MinSpread,                                              //
-                DeltaTime,                                                         //
-                SpreadData.InterpSpeed);                                           //
+        SpreadData.CurrentSpread = FMath::FInterpTo(SpreadData.CurrentSpread,  //
+            SpreadData.MinSpread,                                              //
+            DeltaTime,                                                         //
+            SpreadData.InterpSpeed);                                           //
     }
     Super::Tick(DeltaTime);
 }
@@ -157,6 +157,16 @@ void AShooterBaseWeapon::SimulatePhysics()
     GetWorldTimerManager().SetTimer(CollisionHandle, this, &AShooterBaseWeapon::DisableCollision, 0.1f, false, 4.0f);
 }
 
+void AShooterBaseWeapon::StartAiming() 
+{
+    SpreadData.MinSpread = SpreadData.MinSpread / 4.0;
+}
+
+void AShooterBaseWeapon::EndAiming() 
+{
+    SpreadData.MinSpread = SpreadData.MinSpread * 4.0;
+}
+
 bool AShooterBaseWeapon::CanReload() const
 {
     return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
@@ -183,7 +193,7 @@ void AShooterBaseWeapon::LogAmmo()
     FString AmmoInfo = "Ammo:" + FString::FromInt(CurrentAmmo.Bullets) + " / ";
     AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
 
-    //UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
+    // UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
 }
 
 bool AShooterBaseWeapon::IsAmmoFull()
@@ -208,11 +218,11 @@ UNiagaraComponent* AShooterBaseWeapon::SpawnMuzzleVFX()
         true);
 }
 
-void AShooterBaseWeapon::StartFire() 
+void AShooterBaseWeapon::StartFire()
 {
     IsShooting = true;
 }
-void AShooterBaseWeapon::StopFire() 
+void AShooterBaseWeapon::StopFire()
 {
     IsShooting = false;
 }

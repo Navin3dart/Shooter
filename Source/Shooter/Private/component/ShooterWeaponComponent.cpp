@@ -26,12 +26,12 @@ void UShooterWeaponComponent::BeginPlay()
 void UShooterWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     CurrentWeapon = nullptr;
-    //for (auto Weapon : Weapons)
-    //{
-      //  Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        // Weapon->Destroy();
-      //  Weapon->GetActorEnableCollision();
-    //}
+    /* for (auto Weapon : Weapons)
+    {
+        Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        Weapon->Destroy();
+        Weapon->GetActorEnableCollision();
+    }*/
     Weapons.Empty();
     Super::EndPlay(EndPlayReason);
 }
@@ -61,13 +61,23 @@ void UShooterWeaponComponent::AttachWeaponToSocket(AShooterBaseWeapon* Weapon, U
     Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
 }
 
-void UShooterWeaponComponent::DetachWeapons() 
+void UShooterWeaponComponent::DetachWeapons()
 {
     for (auto Weapon : Weapons)
     {
         Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
         Weapon->SimulatePhysics();
     }
+}
+
+void UShooterWeaponComponent::StartAiming() 
+{
+    CurrentWeapon->StartAiming();
+}
+
+void UShooterWeaponComponent::EndAiming() 
+{
+    CurrentWeapon->EndAiming();
 }
 
 void UShooterWeaponComponent::EquipWeapon(int32 WeaponIndex)
@@ -95,6 +105,12 @@ void UShooterWeaponComponent::EquipWeapon(int32 WeaponIndex)
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
     EqipAnimInProgress = true;
     PlayAnimMontage(EquipAnimMontage);
+}
+
+FVector UShooterWeaponComponent::GetMuzzleWorldLocation() const
+{
+    if (!CurrentWeapon) return FVector::ZeroVector;
+    return CurrentWeapon->GetMuzzleWorldLocation();
 }
 
 void UShooterWeaponComponent::StartFire()
