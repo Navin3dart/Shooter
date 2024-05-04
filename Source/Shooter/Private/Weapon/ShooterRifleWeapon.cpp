@@ -18,6 +18,7 @@ AShooterRifleWeapon::AShooterRifleWeapon()
 
 void AShooterRifleWeapon::StartFire()
 {
+    Super::StartFire();
     InitMuzzleVFX();
     GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &AShooterRifleWeapon::MakeShot, TimeBetweenShots, true);
     MakeShot();
@@ -25,6 +26,7 @@ void AShooterRifleWeapon::StartFire()
 
 void AShooterRifleWeapon::StopFire()
 {
+    Super::StopFire();
     SetMuzzleVFXVisibility(false);
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }

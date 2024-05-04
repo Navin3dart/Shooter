@@ -40,6 +40,27 @@ struct FWeaponUIData
     UTexture2D* CrossHairIcon;
 };
 
+USTRUCT(BlueprintType)
+struct FWeaponSpreadData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Spread")
+    float CurrentSpread;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spread")
+    float MinSpread;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spread")
+    float MaxSpread;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spread")
+    float DeltaSpread;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spread")
+    float InterpSpeed;
+};
+
 UCLASS()
 class SHOOTER_API AShooterBaseWeapon : public AActor
 {
@@ -62,8 +83,12 @@ public:
 
     FAmmoData GetAmmoData() const { return CurrentAmmo; }
 
+    float GetCurrentSpreadRadius() const { return SpreadData.CurrentSpread; }
+
     bool TryToAddAmmo(int32 ClipsAmount);
     bool IsAmmoEmpty() const;
+
+    virtual void Tick(float DeltaTime) override;
 
 
 protected:
@@ -74,13 +99,13 @@ protected:
     FName MuzzleSocketName = "MuzzleSocket"; 
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    float TraceMaxDistance = 1500.0f;
+    float TraceMaxDistance = 15000.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float WeaponDamage = 10.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    float BulletSpread = 1.5f;
+    FWeaponSpreadData SpreadData{0.0f, 0.2f, 3.0f, 0.1f, 2.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     FAmmoData DefaultAmmo{15, 10, false};
@@ -92,6 +117,7 @@ protected:
     UNiagaraSystem* MuzzleVFX;
 
     bool IsShot;
+    bool IsShooting = false;
 
     FAmmoData CurrentAmmo;
 

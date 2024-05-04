@@ -9,24 +9,23 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
-
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
 AShooterBaseWeapon::AShooterBaseWeapon()
 {
-	PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
+    WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
     SetRootComponent(WeaponMesh);
-
 }
 
 void AShooterBaseWeapon::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
     check(WeaponMesh);
 
     CurrentAmmo = DefaultAmmo;
+    SpreadData.CurrentSpread = SpreadData.MinSpread;
 }
 
 APlayerController* AShooterBaseWeapon::GetPlayerController() const
@@ -36,7 +35,7 @@ APlayerController* AShooterBaseWeapon::GetPlayerController() const
     return Player->GetController<APlayerController>();
 }
 
-bool AShooterBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const 
+bool AShooterBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const
 {
     const auto ShooterCharacter = Cast<ACharacter>(GetOwner());
     if (!ShooterCharacter) return false;
@@ -52,11 +51,11 @@ bool AShooterBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& Vie
     {
         ViewLocation = GetMuzzleWorldLocation();
         ViewRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
-    }   
+    }
     return true;
 }
 
-FVector AShooterBaseWeapon::GetMuzzleWorldLocation() const 
+FVector AShooterBaseWeapon::GetMuzzleWorldLocation() const
 {
     return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 }
@@ -65,10 +64,10 @@ bool AShooterBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) co
 {
     FVector ViewLocation;
     FRotator ViewRotation;
-    if(!GetPlayerViewPoint(ViewLocation, ViewRotation)) return false;
+    if (!GetPlayerViewPoint(ViewLocation, ViewRotation)) return false;
 
     TraceStart = ViewLocation;
-    const auto HalfRad = FMath::DegreesToRadians(BulletSpread);
+    const auto HalfRad = FMath::DegreesToRadians(SpreadData.CurrentSpread);
     const FVector ShotDirection = FMath::VRandCone(ViewRotation.Vector(), HalfRad);
     TraceEnd = TraceStart + ShotDirection * TraceMaxDistance;
     return true;
@@ -87,9 +86,15 @@ void AShooterBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStar
 
     const FVector EndPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd;
     IsShot = (FVector::DotProduct(MuzzleDirection, (EndPoint - GetMuzzleWorldLocation()).GetSafeNormal())) > 0.5f;
+
+    if (IsShot)
+    {
+        SpreadData.CurrentSpread = FMath::Clamp(SpreadData.CurrentSpread + SpreadData.DeltaSpread, //
+            SpreadData.MinSpread, SpreadData.MaxSpread);
+    }
 }
 
-void AShooterBaseWeapon::DecreaseAmmo() 
+void AShooterBaseWeapon::DecreaseAmmo()
 {
     if (CurrentAmmo.Bullets == 0)
     {
@@ -111,12 +116,25 @@ bool AShooterBaseWeapon::IsAmmoEmpty() const
     return !CurrentAmmo.Infinite && CurrentAmmo.Clips == 0 && IsClipEmpty();
 }
 
+void AShooterBaseWeapon::Tick(float DeltaTime)
+{
+    //UE_LOG(LogBaseWeapon, Display, TEXT("%f"), SpreadData.CurrentSpread);
+    if (!(FMath::IsNearlyEqual(SpreadData.CurrentSpread, SpreadData.MinSpread, 0.001)) && !IsShooting)
+    {
+            SpreadData.CurrentSpread = FMath::FInterpTo(SpreadData.CurrentSpread,  //
+                SpreadData.MinSpread,                                              //
+                DeltaTime,                                                         //
+                SpreadData.InterpSpeed);                                           //
+    }
+    Super::Tick(DeltaTime);
+}
+
 bool AShooterBaseWeapon::IsClipEmpty() const
 {
     return CurrentAmmo.Bullets == 0;
 }
 
-void AShooterBaseWeapon::ChangeClip() 
+void AShooterBaseWeapon::ChangeClip()
 {
     if (!CurrentAmmo.Infinite)
     {
@@ -128,12 +146,12 @@ void AShooterBaseWeapon::ChangeClip()
         CurrentAmmo.Clips--;
     }
     CurrentAmmo.Bullets = DefaultAmmo.Bullets;
-    UE_LOG(LogBaseWeapon, Display, TEXT ("---------Change Clip--------"));
+    UE_LOG(LogBaseWeapon, Display, TEXT("---------Change Clip--------"));
 }
 
-void AShooterBaseWeapon::SimulatePhysics() 
+void AShooterBaseWeapon::SimulatePhysics()
 {
-    UE_LOG(LogBaseWeapon, Display, TEXT("Coll!"));
+
     WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     WeaponMesh->SetSimulatePhysics(true);
     GetWorldTimerManager().SetTimer(CollisionHandle, this, &AShooterBaseWeapon::DisableCollision, 0.1f, false, 4.0f);
@@ -146,7 +164,7 @@ bool AShooterBaseWeapon::CanReload() const
 
 bool AShooterBaseWeapon::TryToAddAmmo(int32 ClipsAmount)
 {
-    if(CurrentAmmo.Infinite || IsAmmoFull() || ClipsAmount <= 0) return false;
+    if (CurrentAmmo.Infinite || IsAmmoFull() || ClipsAmount <= 0) return false;
 
     if (IsAmmoEmpty())
     {
@@ -160,12 +178,12 @@ bool AShooterBaseWeapon::TryToAddAmmo(int32 ClipsAmount)
     return true;
 }
 
-void AShooterBaseWeapon::LogAmmo() 
+void AShooterBaseWeapon::LogAmmo()
 {
     FString AmmoInfo = "Ammo:" + FString::FromInt(CurrentAmmo.Bullets) + " / ";
     AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
 
-    UE_LOG(LogBaseWeapon, Display, TEXT ("%s"), *AmmoInfo);
+    //UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
 }
 
 bool AShooterBaseWeapon::IsAmmoFull()
@@ -173,7 +191,7 @@ bool AShooterBaseWeapon::IsAmmoFull()
     return CurrentAmmo.Clips == DefaultAmmo.Clips;
 }
 
-void AShooterBaseWeapon::DisableCollision() 
+void AShooterBaseWeapon::DisableCollision()
 {
     WeaponMesh->SetSimulatePhysics(false);
     WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -182,20 +200,20 @@ void AShooterBaseWeapon::DisableCollision()
 UNiagaraComponent* AShooterBaseWeapon::SpawnMuzzleVFX()
 {
     return UNiagaraFunctionLibrary::SpawnSystemAttached(MuzzleVFX,  //
-        WeaponMesh,                                          //
-        MuzzleSocketName,                                    //
-        FVector::ZeroVector,                                 //
-        FRotator::ZeroRotator,                               //
-        EAttachLocation::SnapToTarget,                       //
+        WeaponMesh,                                                 //
+        MuzzleSocketName,                                           //
+        FVector::ZeroVector,                                        //
+        FRotator::ZeroRotator,                                      //
+        EAttachLocation::SnapToTarget,                              //
         true);
 }
 
-void AShooterBaseWeapon::StartFire()
+void AShooterBaseWeapon::StartFire() 
 {
+    IsShooting = true;
 }
 void AShooterBaseWeapon::StopFire() 
 {
+    IsShooting = false;
 }
-void AShooterBaseWeapon::MakeShot() 
-{
-}
+void AShooterBaseWeapon::MakeShot() {}

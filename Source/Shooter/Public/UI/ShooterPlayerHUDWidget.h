@@ -22,6 +22,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "UI")
     bool GetWeaponUIData(FWeaponUIData& UIData) const;
 
+    float GetWeaponSpreadRadius() const;
+
     UFUNCTION(BlueprintCallable, Category = "UI")
     bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
 

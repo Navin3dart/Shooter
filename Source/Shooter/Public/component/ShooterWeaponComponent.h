@@ -38,8 +38,12 @@ public:
 
     bool GetWeaponUIData(FWeaponUIData& UIData) const;
     bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
+    float GetWeaponSpreadRadius() const { return CurrentWeapon->GetCurrentSpreadRadius(); }
 
     bool TryToAddAmmo(TSubclassOf<AShooterBaseWeapon> WeaponType, int32 ClipsAmount);
+
+    UPROPERTY()
+    AShooterBaseWeapon* CurrentWeapon = nullptr;
 
 protected:
 
@@ -58,8 +62,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon|Animation")
     UAnimMontage* EquipAnimMontage;
 
-    UPROPERTY()
-    AShooterBaseWeapon* CurrentWeapon = nullptr;
+
 
     UPROPERTY()
     TArray<AShooterBaseWeapon*> Weapons;

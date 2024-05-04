@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "UI/ShooterPlayerHUDWidget.h"
 #include "ShooterGameHUD.generated.h"
 
+class UShooterPlayerHUDWidget;
 
 UCLASS()
 class SHOOTER_API AShooterGameHUD : public AHUD
@@ -18,9 +20,11 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
+    TSubclassOf<UShooterPlayerHUDWidget> PlayerHUDWidgetClass;
 
     virtual void BeginPlay() override;
+
+    UShooterPlayerHUDWidget* PlayerHUDWidget;
 
 private:
     void DrawCrossHair();

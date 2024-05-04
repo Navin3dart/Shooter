@@ -27,6 +27,21 @@ bool UShooterPlayerHUDWidget::GetWeaponUIData(FWeaponUIData& UIData) const
     return WeaponComponent->GetWeaponUIData(UIData);
 }
 
+float UShooterPlayerHUDWidget::GetWeaponSpreadRadius() const
+{
+
+    const auto Player = GetOwningPlayerPawn();
+    if (!Player) return 0.0f;
+
+    const auto Component = Player->GetComponentByClass(UShooterWeaponComponent::StaticClass());
+    const auto WeaponComponent = Cast<UShooterWeaponComponent>(Component);
+    if (!WeaponComponent) return 0.0f;
+
+    return WeaponComponent->GetWeaponSpreadRadius();
+}
+
+
+
 bool UShooterPlayerHUDWidget::GetWeaponAmmoData(FAmmoData& AmmoData) const
 {
     const auto Player = GetOwningPlayerPawn();
