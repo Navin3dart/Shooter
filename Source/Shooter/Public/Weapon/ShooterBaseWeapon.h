@@ -79,6 +79,8 @@ public:
     void StartAiming();
     void EndAiming();
 
+    void ChangeSpreadRadius(float ModifyerSpread);
+
     bool CanReload() const;
 
     FWeaponUIData GetUIData() const { return UIData; }
@@ -93,15 +95,18 @@ public:
     virtual void Tick(float DeltaTime) override;
     FVector GetMuzzleWorldLocation() const;
 
-
-protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
     FName MuzzleSocketName = "MuzzleSocket"; 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+
+
+
+protected:
+
+    	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float TraceMaxDistance = 15000.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")

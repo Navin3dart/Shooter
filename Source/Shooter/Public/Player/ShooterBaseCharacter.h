@@ -78,12 +78,16 @@ private:
     float TargetSpeed;
     float InterpSpeed;
 
+    float CameraInterpSpeed = 10.0f;
+    float CurrentCameraParam = 0.0f;
+    float TargetCameraParam = 0.0f;
+
     void MoveForward(float Amount);
     void MoveRight(float Amount);
     void Run();
     void Walk();
-    void StartAiming();
-    void EndAiming();
+
+    void Aiming(bool IsAiming);
 
     void OnHealthChanged(float Health);
 

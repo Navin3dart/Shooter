@@ -31,6 +31,11 @@ void AShooterRifleWeapon::StopFire()
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }
 
+void AShooterRifleWeapon::Tick(float DeltaTime) 
+{
+    Super::Tick(DeltaTime);
+}
+
 void AShooterRifleWeapon::BeginPlay() 
 {
     Super::BeginPlay();

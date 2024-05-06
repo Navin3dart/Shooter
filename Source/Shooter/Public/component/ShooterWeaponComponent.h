@@ -50,6 +50,15 @@ public:
     UFUNCTION(Category = "Weapon")
     FVector GetMuzzleWorldLocation() const;
 
+    bool CanFire() const;
+
+    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+    UFUNCTION(BlueprintCallable, Category = "AIMING")
+    float GetAimingOffsetX() const;
+
+    UFUNCTION(BlueprintCallable, Category = "AIMING")
+    float GetAimingOffsetY() const;
 
 protected:
 
@@ -71,12 +80,13 @@ protected:
     UPROPERTY()
     TArray<AShooterBaseWeapon*> Weapons;
 
-    bool CanFire() const;
+    //bool CanFire() const;
     bool CanEquip() const;
     void EquipWeapon(int32 WeaponIndex);
 
 
-
+    float MultiplayerX;
+    float MultiplayerY;
     int32 CurrentWeaponIndex = 0;
 
 private:

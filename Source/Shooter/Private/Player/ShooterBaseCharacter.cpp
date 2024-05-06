@@ -72,6 +72,15 @@ void AShooterBaseCharacter::Tick(float DeltaTime)
         CurrentSpeed = FMath::FInterpTo(CurrentSpeed, TargetSpeed, DeltaTime, InterpSpeed);
         GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
     }
+
+    if (!(FMath::IsNearlyEqual(TargetCameraParam, CurrentCameraParam, 0.1)))
+    {
+        CurrentCameraParam = FMath::FInterpTo(CurrentCameraParam, TargetCameraParam, DeltaTime, CameraInterpSpeed);
+        SpringArmComponent->TargetArmLength = FMath::Lerp(600.0f, 400.0f, CurrentCameraParam);
+        CameraComponent->SetFieldOfView(FMath::Lerp(90.0f, 60.0f, CurrentCameraParam));
+    }
+
+
 }
 
 void AShooterBaseCharacter::OnHealthChanged(float Health) 
@@ -94,8 +103,12 @@ void AShooterBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &UShooterWeaponComponent::StopFire);
     PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::NextWeapon);
     PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::Reload);
-    PlayerInputComponent->BindAction("Aiming", IE_Released, this, &AShooterBaseCharacter::EndAiming);
-    PlayerInputComponent->BindAction("Aiming", IE_Pressed, this, &AShooterBaseCharacter::StartAiming);
+    //PlayerInputComponent->BindAction("Aiming", IE_Released, this, &AShooterBaseCharacter::EndAiming);
+    //PlayerInputComponent->BindAction("Aiming", IE_Pressed, this, &AShooterBaseCharacter::StartAiming);
+
+    DECLARE_DELEGATE_OneParam(FAimingInputSignature, bool);
+    PlayerInputComponent->BindAction<FAimingInputSignature>("Aiming", IE_Released, this, &AShooterBaseCharacter::Aiming, true);
+    PlayerInputComponent->BindAction<FAimingInputSignature>("Aiming", IE_Pressed, this, &AShooterBaseCharacter::Aiming, false);
 
 }
 
@@ -131,7 +144,6 @@ void AShooterBaseCharacter::Run()
     {
         //UE_LOG(LogShooter, Display, TEXT("Run"));
         TargetSpeed = RunSpeed;
-        //GetCharacterMovement()->MaxWalkSpeed = 600;
     }
 }
 
@@ -139,20 +151,23 @@ void AShooterBaseCharacter::Walk()
 {
     //UE_LOG(LogShooter, Display, TEXT("Walk"));
     TargetSpeed = WalkSpeed;
-    //GetCharacterMovement()->MaxWalkSpeed = 300;
 }
 
-void AShooterBaseCharacter::StartAiming() 
+void AShooterBaseCharacter::Aiming(bool IsAiming) 
 {
-    WeaponComponent->StartAiming();
-    SpringArmComponent->TargetArmLength = 100;
+    if (IsAiming)
+    {
+        WeaponComponent->EndAiming();
+        TargetCameraParam = 0.0f;
+    }
+    else
+    {
+        WeaponComponent->StartAiming();
+        TargetCameraParam = 1.0f;
+    }
 }
 
-void AShooterBaseCharacter::EndAiming() 
-{
-    WeaponComponent->EndAiming();
-    SpringArmComponent->TargetArmLength = 600;
-}
+
 
 void AShooterBaseCharacter::OnDeath()
 {

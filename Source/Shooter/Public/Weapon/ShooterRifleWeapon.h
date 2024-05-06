@@ -23,6 +23,8 @@ public:
     virtual void StartFire() override;
     virtual void StopFire() override;
 
+    virtual void Tick(float DeltaTime) override;
+
 
 protected:
     virtual void BeginPlay() override;

@@ -11,7 +11,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All)
 
 UShooterWeaponComponent::UShooterWeaponComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
+    PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UShooterWeaponComponent::BeginPlay()
@@ -72,12 +72,12 @@ void UShooterWeaponComponent::DetachWeapons()
 
 void UShooterWeaponComponent::StartAiming() 
 {
-    CurrentWeapon->StartAiming();
+    CurrentWeapon->ChangeSpreadRadius(0.25f);
 }
 
 void UShooterWeaponComponent::EndAiming() 
 {
-    CurrentWeapon->EndAiming();
+    CurrentWeapon->ChangeSpreadRadius(4.0f);
 }
 
 void UShooterWeaponComponent::EquipWeapon(int32 WeaponIndex)
@@ -211,6 +211,84 @@ bool UShooterWeaponComponent::CanFire() const
 {
     return CurrentWeapon && !EqipAnimInProgress && !ReloadAnimInProgress;
 }
+
+void UShooterWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) 
+{
+    if (GetWorld() && CanFire())
+    {
+        ACharacter* Character = Cast<ACharacter>(GetOwner());
+        const auto Controller = Character->GetController<APlayerController>();
+
+
+        if (Controller)
+        {
+            const auto WeaponMesh = CurrentWeapon->WeaponMesh;
+            FName MuzzleSocketName = CurrentWeapon->MuzzleSocketName;
+            const FVector MuzzleDirection = WeaponMesh->GetSocketTransform(MuzzleSocketName).GetRotation().GetForwardVector();
+
+            FHitResult WeaponHitResult;
+            FVector MuzzleLocation = GetMuzzleWorldLocation();
+            FVector TargetLocation = MuzzleDirection * 15000.0f + MuzzleLocation;
+            FVector HitLocation = TargetLocation;
+
+            GetWorld()->LineTraceSingleByChannel(WeaponHitResult, MuzzleLocation, TargetLocation, ECollisionChannel::ECC_Visibility);
+            if (WeaponHitResult.bBlockingHit)
+            {
+                HitLocation = WeaponHitResult.ImpactPoint;
+            }
+            FVector2d ScreenLocation;
+            FVector ImpictLoaction = WeaponHitResult.ImpactPoint;
+            bool LocationIsScreen = Controller->ProjectWorldLocationToScreen(HitLocation, ScreenLocation);
+            if (LocationIsScreen)
+            {
+                FVector2d ViewportSize = GEngine->GameViewport->Viewport->GetSizeXY();
+                FVector2d NormilizeScreenLocation = ScreenLocation / ViewportSize;
+                FVector2d CorrectionParam = (FMath::Abs(ScreenLocation - (ViewportSize / 2.0f)) / 6.0f);
+
+                const bool IsXTop = NormilizeScreenLocation.X > 0.5f;
+                bool IsYLeft = NormilizeScreenLocation.Y > 0.5f;
+                float OffsetX;
+                float OffsetY;
+                if (IsXTop)
+                {
+                    OffsetX = -0.25f;
+                }
+                else
+                {
+                    OffsetX = 0.25f;
+                }
+                if (IsYLeft)
+                {
+                    OffsetY = 0.25f;
+                }
+                else
+                {
+                    OffsetY = -0.25f;
+                }
+                MultiplayerX = MultiplayerX + OffsetX * FMath::Clamp(CorrectionParam.X, 0.0f, 1.0f);
+                MultiplayerY = MultiplayerY + OffsetY * FMath::Clamp(CorrectionParam.Y, 0.0f, 1.0f);
+
+                //UE_LOG(LogWeaponComponent, Display, TEXT("%f"), NormilizeScreenLocation.X);
+                //UE_LOG(LogWeaponComponent, Display, TEXT("%s"), (IsXTop ? TEXT("true"): TEXT("false")));
+                //UE_LOG(LogWeaponComponent, Display, TEXT("%f"), MultiplayerX);
+            }
+        }
+    }
+
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+float UShooterWeaponComponent::GetAimingOffsetX() const
+{
+    return MultiplayerX;
+}
+
+float UShooterWeaponComponent::GetAimingOffsetY() const
+{
+    return MultiplayerY;
+}
+
+
 
 bool UShooterWeaponComponent::CanReload() const
 {

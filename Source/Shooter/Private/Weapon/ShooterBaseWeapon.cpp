@@ -8,6 +8,7 @@
 #include "GameFramework/Controller.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
@@ -118,7 +119,6 @@ bool AShooterBaseWeapon::IsAmmoEmpty() const
 
 void AShooterBaseWeapon::Tick(float DeltaTime)
 {
-    // UE_LOG(LogBaseWeapon, Display, TEXT("%f"), SpreadData.CurrentSpread);
     if (!(FMath::IsNearlyEqual(SpreadData.CurrentSpread, SpreadData.MinSpread, 0.001)) && !IsShooting)
     {
         SpreadData.CurrentSpread = FMath::FInterpTo(SpreadData.CurrentSpread,  //
@@ -126,6 +126,39 @@ void AShooterBaseWeapon::Tick(float DeltaTime)
             DeltaTime,                                                         //
             SpreadData.InterpSpeed);                                           //
     }
+
+    /* if (GetWorld())
+        {
+        const auto Controller = GetPlayerController();
+            if (!Controller)
+            {
+                //UE_LOG(LogBaseWeapon, Display, TEXT("Tick"));
+                const FVector MuzzleDirection = WeaponMesh->GetSocketTransform(MuzzleSocketName).GetRotation().GetForwardVector();
+
+                FHitResult WeaponHitResult;
+                FVector MuzzleLocation = GetMuzzleWorldLocation();
+                FVector TargetLocation = MuzzleDirection * TraceMaxDistance + MuzzleLocation;
+
+                GetWorld()->LineTraceSingleByChannel(WeaponHitResult, MuzzleLocation, TargetLocation, ECollisionChannel::ECC_Visibility);
+                FVector2d ScreenLocation;
+                bool LocationIsScreen = Controller->ProjectWorldLocationToScreen(WeaponHitResult.ImpactPoint, ScreenLocation);
+                if (!LocationIsScreen)
+                {
+                    FVector2d ViewportSize = GEngine->GameViewport->Viewport->GetSizeXY();
+                    FVector2d NormilizeScreenLocation = ScreenLocation / ViewportSize;
+                    FVector2d CorrectionParam = (FMath::Abs(ScreenLocation - (ViewportSize / 2.0f))/6.0f);
+
+                    bool IsXTop = NormilizeScreenLocation.X > 0.5f;
+                    bool IsYLeft = NormilizeScreenLocation.Y > 0.5f;
+
+                    float MultiplayerX = FMath::FloatSelect(-0.25f, 0.25f, IsXTop);
+                    float MultiplayerY = FMath::FloatSelect(0.25f, -0.25f, IsYLeft);
+                    UE_LOG(LogBaseWeapon, Display, TEXT("%f"), MultiplayerX);
+
+                }
+            }
+        }
+        */
     Super::Tick(DeltaTime);
 }
 
@@ -165,6 +198,11 @@ void AShooterBaseWeapon::StartAiming()
 void AShooterBaseWeapon::EndAiming() 
 {
     SpreadData.MinSpread = SpreadData.MinSpread * 4.0;
+}
+
+void AShooterBaseWeapon::ChangeSpreadRadius(float ModifyerSpread) 
+{
+    SpreadData.MinSpread = SpreadData.MinSpread * ModifyerSpread;
 }
 
 bool AShooterBaseWeapon::CanReload() const
