@@ -22,6 +22,7 @@ public:
 
     AShooterBaseCharacter(const FObjectInitializer& ObjInit);
 
+
 protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -69,7 +70,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     FVector GetMuzzleSoketLocation() const;
-
+    void Walk();
 
 
 private:
@@ -85,7 +86,7 @@ private:
     void MoveForward(float Amount);
     void MoveRight(float Amount);
     void Run();
-    void Walk();
+
 
     void Aiming(bool IsAiming);
 

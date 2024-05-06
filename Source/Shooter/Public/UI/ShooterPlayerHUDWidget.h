@@ -20,6 +20,9 @@ public:
     float GetHealthPercent() const;
 
     UFUNCTION(BlueprintCallable, Category = "UI")
+    float GetStaminaPercent() const;
+
+    UFUNCTION(BlueprintCallable, Category = "UI")
     bool GetWeaponUIData(FWeaponUIData& UIData) const;
 
     float GetWeaponSpreadRadius() const;

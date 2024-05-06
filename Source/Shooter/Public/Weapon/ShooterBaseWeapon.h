@@ -45,8 +45,9 @@ struct FWeaponSpreadData
 {
     GENERATED_USTRUCT_BODY()
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Spread")
     float CurrentSpread;
+    float MinSpreadCurrent;
+    float MaxSpreadCurrent;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spread")
     float MinSpread;
@@ -76,10 +77,9 @@ public:
 
     void ChangeClip();
     void SimulatePhysics();
-    void StartAiming();
-    void EndAiming();
 
-    void ChangeSpreadRadius(float ModifyerSpread);
+    //void ChangeSpreadRadius(float ModifyerSpread); //aiming
+    void UpdateSpreadRadius();
 
     bool CanReload() const;
 
@@ -101,8 +101,8 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
     FName MuzzleSocketName = "MuzzleSocket"; 
 
-
-
+    float SpreadAiming = 1.0f;
+    float WalkModifyerSpread = 1.0f;
 
 protected:
 

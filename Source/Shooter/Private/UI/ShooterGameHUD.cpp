@@ -29,7 +29,7 @@ void AShooterGameHUD::DrawCrossHair()
     const float HalfLineSize = 10.0f;
     const float LineThickness = 1.0f;
     const FLinearColor LineColor = FLinearColor::Black;
-    float Offset = (PlayerHUDWidget->GetWeaponSpreadRadius())*20.0f;
+    float Offset = (PlayerHUDWidget->GetWeaponSpreadRadius())*25.0f;
 
     DrawLine(Center.Min - HalfLineSize - Offset,  // Start X
         Center.Max,                               // Start Y

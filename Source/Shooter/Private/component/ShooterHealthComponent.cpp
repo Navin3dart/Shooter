@@ -10,6 +10,7 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "Camera/CameraShakeBase.h"
+#include "Player/ShooterBaseCharacter.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All)
@@ -32,6 +33,8 @@ void UShooterHealthComponent::BeginPlay()
 
     check(MaxHealth > 0);
     SetHealth(MaxHealth);
+    check(MaxStamina > 0);
+    SetStamina(MaxStamina);
 
 		AActor* ComponentOwner = GetOwner();
 	if (ComponentOwner)
@@ -51,6 +54,47 @@ void UShooterHealthComponent::TimerAutoHeal()
            GetWorld()->GetTimerManager().ClearTimer(TimerHandleAutoHeal);
        }
        //UE_LOG(LogHealthComponent, Display, TEXT("Heal: %f"), Health);
+}
+
+void UShooterHealthComponent::TimerStaminaRegeneration() 
+{
+    SetStamina(Stamina + StaminaPerSecond);
+    if (FMath::IsNearlyEqual(Stamina, MaxStamina) && GetWorld())
+    {
+        GetWorld()->GetTimerManager().ClearTimer(TimerHandleAutoRegenStamina);
+    }
+}
+
+void UShooterHealthComponent::TimerStaminaDecrease() 
+{
+    SetStamina(Stamina - DecreaseStaminaPerSecond*0.1f);
+    if (FMath::IsNearlyEqual(Stamina, 0.0f))
+    {
+        GetWorld()->GetTimerManager().ClearTimer(TimerHandleDecreaseStamina);
+
+        const auto Player = Cast<AShooterBaseCharacter>(GetOwner());
+        if (!Player) return;
+        Player->Walk();
+
+    }
+}
+
+void UShooterHealthComponent::StartRunStamina() 
+{
+    GetWorld()->GetTimerManager().SetTimer(TimerHandleDecreaseStamina, this, &UShooterHealthComponent::TimerStaminaDecrease, 0.1f, true);
+    GetWorld()->GetTimerManager().ClearTimer(TimerHandleAutoRegenStamina);
+}
+
+void UShooterHealthComponent::StopRunStamina() 
+{
+    GetWorld()->GetTimerManager().ClearTimer(TimerHandleDecreaseStamina);
+    StartRegenerationStamina();
+}
+
+void UShooterHealthComponent::StartRegenerationStamina() 
+{
+    GetWorld()->GetTimerManager().SetTimer(TimerHandleAutoRegenStamina, this, &UShooterHealthComponent::TimerStaminaRegeneration,
+        TimerRateStaminaRegen, true, DelayStaminaRegenStart);
 }
 
 
@@ -96,6 +140,11 @@ void UShooterHealthComponent::SetHealth(float NewHealth)
 {
     Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(Health);
+}
+
+void UShooterHealthComponent::SetStamina(float NewStamina) 
+{
+    Stamina = FMath::Clamp(NewStamina, 0.0f, MaxStamina);
 }
 
 void UShooterHealthComponent::PlayCameraShake()

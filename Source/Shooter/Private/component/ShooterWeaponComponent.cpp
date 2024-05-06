@@ -70,14 +70,16 @@ void UShooterWeaponComponent::DetachWeapons()
     }
 }
 
-void UShooterWeaponComponent::StartAiming() 
+void UShooterWeaponComponent::Aiming(bool IsAiming) 
 {
-    CurrentWeapon->ChangeSpreadRadius(0.25f);
-}
-
-void UShooterWeaponComponent::EndAiming() 
-{
-    CurrentWeapon->ChangeSpreadRadius(4.0f);
+    if (!IsAiming)
+    {
+        CurrentWeapon->SpreadAiming = 0.25f;
+    }
+    else
+    {
+        CurrentWeapon->SpreadAiming = 1.0f;
+    }
 }
 
 void UShooterWeaponComponent::EquipWeapon(int32 WeaponIndex)
@@ -97,14 +99,25 @@ void UShooterWeaponComponent::EquipWeapon(int32 WeaponIndex)
         AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponArmorySocketName);
     }
     CurrentWeapon = Weapons[WeaponIndex];
-    // CurrentReloadAnimMontage = WeaponData[WeaponIndex].ReloadAnimMontage;
+
     const auto CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData& Data) {  //
         return Data.WeaponClass == CurrentWeapon->GetClass();                                 //
     });
     CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
+
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
+
     EqipAnimInProgress = true;
     PlayAnimMontage(EquipAnimMontage);
+}
+
+void UShooterWeaponComponent::UpdateSpreadRadiusForSpeed() 
+{
+    ACharacter* Character = Cast<ACharacter>(GetOwner());
+    if (!Character && !CurrentWeapon) return;
+    float SpeedNormilize = (Character->GetVelocity().Length()) / 600.0f;
+    //UE_LOG(LogWeaponComponent, Display, TEXT("%f"), SpeedNormilize);
+    CurrentWeapon->WalkModifyerSpread = FMath::Lerp(1.0f, 6.0f, SpeedNormilize);
 }
 
 FVector UShooterWeaponComponent::GetMuzzleWorldLocation() const
@@ -214,6 +227,12 @@ bool UShooterWeaponComponent::CanFire() const
 
 void UShooterWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) 
 {
+    if (CurrentWeapon)
+    {
+        UpdateSpreadRadiusForSpeed();
+        CurrentWeapon->UpdateSpreadRadius();
+    }
+
     if (GetWorld() && CanFire())
     {
         ACharacter* Character = Cast<ACharacter>(GetOwner());
@@ -287,8 +306,6 @@ float UShooterWeaponComponent::GetAimingOffsetY() const
 {
     return MultiplayerY;
 }
-
-
 
 bool UShooterWeaponComponent::CanReload() const
 {

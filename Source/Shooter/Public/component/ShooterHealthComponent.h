@@ -27,17 +27,45 @@ public:
 	UFUNCTION(BlueprintCallable, category = "Health")
     float GetHealthPercent() const { return Health / MaxHealth; }
 
+    UFUNCTION(BlueprintCallable, category = "Health")
+    float GetStaminaPercent() const { return Stamina / MaxStamina; }
+
 	bool AddHealth(int32 HealthAmount);
 
 	FOnDeath OnDeath;
     FOnHealthChanged OnHealthChanged;
     FTimerHandle TimerHandleAutoHeal;
 
+    FTimerHandle TimerHandleAutoRegenStamina;
+    FTimerHandle TimerHandleDecreaseStamina;
+
+    float Stamina = 0.0f;
+
+	void SetStamina(float NewStamina); 
+	void StartRunStamina();
+    void StopRunStamina();
+    void StartRegenerationStamina();
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Health", meta = (ClampMin = "10", ClampMax = "200"))
 	float MaxHealth = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Stamina", meta = (ClampMin = "10", ClampMax = "200"))
+    float MaxStamina = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Stamina", meta = (ClampMin = "10", ClampMax = "200"))
+    float StaminaPerSecond = 5.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Stamina", meta = (ClampMin = "1", ClampMax = "20"))
+    float DecreaseStaminaPerSecond = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Stamina")
+    float DelayStaminaRegenStart = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Stamina")
+    float TimerRateStaminaRegen = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Health|AutoHeal")
     bool UseAutoHeal = false;
@@ -60,8 +88,13 @@ protected:
 
 
 
+
 	void TimerAutoHeal();
+    void TimerStaminaRegeneration();
+    void TimerStaminaDecrease();
+
     void SetHealth(float NewHealth);
+
 
 	void PlayCameraShake();
 

@@ -66,7 +66,7 @@ void AShooterBaseCharacter::BeginPlay()
 void AShooterBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+    UE_LOG(LogShooter, Display, TEXT("%f"), HealthComponent->Stamina);
     if (!(FMath::IsNearlyEqual(TargetSpeed, CurrentSpeed, 0.1)))
     {
         CurrentSpeed = FMath::FInterpTo(CurrentSpeed, TargetSpeed, DeltaTime, InterpSpeed);
@@ -142,27 +142,31 @@ void AShooterBaseCharacter::Run()
 {
     if (!GetVelocity().IsZero())
     {
-        //UE_LOG(LogShooter, Display, TEXT("Run"));
-        TargetSpeed = RunSpeed;
+        if (!(FMath::IsNearlyEqual(HealthComponent->Stamina, 0)))
+        {
+            HealthComponent->StartRunStamina();
+
+            TargetSpeed = RunSpeed;
+        }
     }
 }
 
 void AShooterBaseCharacter::Walk() 
 {
-    //UE_LOG(LogShooter, Display, TEXT("Walk"));
     TargetSpeed = WalkSpeed;
+    HealthComponent->StopRunStamina();
 }
 
 void AShooterBaseCharacter::Aiming(bool IsAiming) 
 {
     if (IsAiming)
     {
-        WeaponComponent->EndAiming();
+        WeaponComponent->Aiming(IsAiming);
         TargetCameraParam = 0.0f;
     }
     else
     {
-        WeaponComponent->StartAiming();
+        WeaponComponent->Aiming(IsAiming);
         TargetCameraParam = 1.0f;
     }
 }

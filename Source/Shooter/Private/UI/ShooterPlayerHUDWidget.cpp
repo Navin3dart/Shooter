@@ -15,6 +15,14 @@ float UShooterPlayerHUDWidget::GetHealthPercent() const
     return HealthComponent->GetHealthPercent();
 }
 
+float UShooterPlayerHUDWidget::GetStaminaPercent() const
+{
+    const auto HealthComponent = GetHealthComponent();
+    if (!HealthComponent) return 0.0f;
+
+    return HealthComponent->GetStaminaPercent();
+}
+
 bool UShooterPlayerHUDWidget::GetWeaponUIData(FWeaponUIData& UIData) const
 {
     const auto Player = GetOwningPlayerPawn();

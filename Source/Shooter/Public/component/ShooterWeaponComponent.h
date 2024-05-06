@@ -35,8 +35,7 @@ public:
     virtual void NextWeapon();
     void Reload();
     void DetachWeapons();
-    void StartAiming();
-    void EndAiming();
+    void Aiming(bool IsAiming);
 
     bool GetWeaponUIData(FWeaponUIData& UIData) const;
     bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
@@ -84,14 +83,14 @@ protected:
     bool CanEquip() const;
     void EquipWeapon(int32 WeaponIndex);
 
+    void UpdateSpreadRadiusForSpeed();
+
 
     float MultiplayerX;
     float MultiplayerY;
     int32 CurrentWeaponIndex = 0;
 
 private:
-
-
 
     UPROPERTY()
     UAnimMontage* CurrentReloadAnimMontage = nullptr;

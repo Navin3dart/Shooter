@@ -26,7 +26,7 @@ void AShooterBaseWeapon::BeginPlay()
     check(WeaponMesh);
 
     CurrentAmmo = DefaultAmmo;
-    SpreadData.CurrentSpread = SpreadData.MinSpread;
+    SpreadData.CurrentSpread = SpreadData.MinSpreadCurrent;
 }
 
 APlayerController* AShooterBaseWeapon::GetPlayerController() const
@@ -91,7 +91,7 @@ void AShooterBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStar
     if (IsShot)
     {
         SpreadData.CurrentSpread = FMath::Clamp(SpreadData.CurrentSpread + SpreadData.DeltaSpread,  //
-            SpreadData.MinSpread, SpreadData.MaxSpread);
+            SpreadData.MinSpreadCurrent, SpreadData.MaxSpreadCurrent);
     }
 }
 
@@ -119,46 +119,13 @@ bool AShooterBaseWeapon::IsAmmoEmpty() const
 
 void AShooterBaseWeapon::Tick(float DeltaTime)
 {
-    if (!(FMath::IsNearlyEqual(SpreadData.CurrentSpread, SpreadData.MinSpread, 0.001)) && !IsShooting)
+    if (!(FMath::IsNearlyEqual(SpreadData.CurrentSpread, SpreadData.MinSpreadCurrent, 0.001)) && !IsShooting)
     {
         SpreadData.CurrentSpread = FMath::FInterpTo(SpreadData.CurrentSpread,  //
-            SpreadData.MinSpread,                                              //
+            SpreadData.MinSpreadCurrent,                                       //
             DeltaTime,                                                         //
             SpreadData.InterpSpeed);                                           //
     }
-
-    /* if (GetWorld())
-        {
-        const auto Controller = GetPlayerController();
-            if (!Controller)
-            {
-                //UE_LOG(LogBaseWeapon, Display, TEXT("Tick"));
-                const FVector MuzzleDirection = WeaponMesh->GetSocketTransform(MuzzleSocketName).GetRotation().GetForwardVector();
-
-                FHitResult WeaponHitResult;
-                FVector MuzzleLocation = GetMuzzleWorldLocation();
-                FVector TargetLocation = MuzzleDirection * TraceMaxDistance + MuzzleLocation;
-
-                GetWorld()->LineTraceSingleByChannel(WeaponHitResult, MuzzleLocation, TargetLocation, ECollisionChannel::ECC_Visibility);
-                FVector2d ScreenLocation;
-                bool LocationIsScreen = Controller->ProjectWorldLocationToScreen(WeaponHitResult.ImpactPoint, ScreenLocation);
-                if (!LocationIsScreen)
-                {
-                    FVector2d ViewportSize = GEngine->GameViewport->Viewport->GetSizeXY();
-                    FVector2d NormilizeScreenLocation = ScreenLocation / ViewportSize;
-                    FVector2d CorrectionParam = (FMath::Abs(ScreenLocation - (ViewportSize / 2.0f))/6.0f);
-
-                    bool IsXTop = NormilizeScreenLocation.X > 0.5f;
-                    bool IsYLeft = NormilizeScreenLocation.Y > 0.5f;
-
-                    float MultiplayerX = FMath::FloatSelect(-0.25f, 0.25f, IsXTop);
-                    float MultiplayerY = FMath::FloatSelect(0.25f, -0.25f, IsYLeft);
-                    UE_LOG(LogBaseWeapon, Display, TEXT("%f"), MultiplayerX);
-
-                }
-            }
-        }
-        */
     Super::Tick(DeltaTime);
 }
 
@@ -190,19 +157,10 @@ void AShooterBaseWeapon::SimulatePhysics()
     GetWorldTimerManager().SetTimer(CollisionHandle, this, &AShooterBaseWeapon::DisableCollision, 0.1f, false, 4.0f);
 }
 
-void AShooterBaseWeapon::StartAiming() 
+void AShooterBaseWeapon::UpdateSpreadRadius()
 {
-    SpreadData.MinSpread = SpreadData.MinSpread / 4.0;
-}
-
-void AShooterBaseWeapon::EndAiming() 
-{
-    SpreadData.MinSpread = SpreadData.MinSpread * 4.0;
-}
-
-void AShooterBaseWeapon::ChangeSpreadRadius(float ModifyerSpread) 
-{
-    SpreadData.MinSpread = SpreadData.MinSpread * ModifyerSpread;
+    SpreadData.MinSpreadCurrent = SpreadData.MinSpread * SpreadAiming * WalkModifyerSpread;
+    SpreadData.MaxSpreadCurrent = SpreadData.MaxSpread * SpreadAiming * WalkModifyerSpread;
 }
 
 bool AShooterBaseWeapon::CanReload() const
