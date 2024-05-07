@@ -83,6 +83,23 @@ void UShooterWeaponComponent::Aiming(bool IsAiming)
     }
 }
 
+void UShooterWeaponComponent::Crouch(bool IsCrouch) 
+{
+    if (!IsCrouch)
+    {
+        CurrentWeapon->CrouchModifyer = 0.5f;
+    }
+    else
+    {
+        CurrentWeapon->CrouchModifyer = 1.0f;
+    }
+}
+
+void UShooterWeaponComponent::PlayRecoil() 
+{
+    PlayAnimMontage(CurrentRecoilAnimMontage);
+}
+
 void UShooterWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
     if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
@@ -105,6 +122,7 @@ void UShooterWeaponComponent::EquipWeapon(int32 WeaponIndex)
         return Data.WeaponClass == CurrentWeapon->GetClass();                                 //
     });
     CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
+    CurrentRecoilAnimMontage = CurrentWeaponData ? CurrentWeaponData->FiringAnimMontage : nullptr;
 
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
 
@@ -264,7 +282,7 @@ void UShooterWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType
             {
                 FVector2d ViewportSize = GEngine->GameViewport->Viewport->GetSizeXY();
                 FVector2d NormilizeScreenLocation = ScreenLocation / ViewportSize;
-                FVector2d CorrectionParam = (FMath::Abs(ScreenLocation - (ViewportSize / 2.0f)) / 6.0f);
+                FVector2d CorrectionParam = (FMath::Abs(ScreenLocation - (ViewportSize / 2.0f)) / 10.0f);
 
                 const bool IsXTop = NormilizeScreenLocation.X > 0.5f;
                 bool IsYLeft = NormilizeScreenLocation.Y > 0.5f;
@@ -286,8 +304,8 @@ void UShooterWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType
                 {
                     OffsetY = -0.25f;
                 }
-                MultiplayerX = MultiplayerX + OffsetX * FMath::Clamp(CorrectionParam.X, 0.0f, 1.0f);
-                MultiplayerY = MultiplayerY + OffsetY * FMath::Clamp(CorrectionParam.Y, 0.0f, 1.0f);
+                MultiplayerX = MultiplayerX + OffsetX * FMath::Clamp(CorrectionParam.X, 0.0f, 2.0f);
+                MultiplayerY = MultiplayerY + OffsetY * FMath::Clamp(CorrectionParam.Y, 0.0f, 2.0f);
                 CalculateAimingOffset();
                 //UE_LOG(LogWeaponComponent, Display, TEXT("%f"), NormilizeScreenLocation.X);
                 //UE_LOG(LogWeaponComponent, Display, TEXT("%s"), (IsXTop ? TEXT("true"): TEXT("false")));

@@ -29,10 +29,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon");
     UProjectileMovementComponent* MovementComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = "Damage");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage");
     float DamageRadius = 200.0f;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = "Damage");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage");
     float DamageAmount = 50.0f;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Damage");

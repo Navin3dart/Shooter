@@ -103,6 +103,7 @@ public:
 
     float SpreadAiming = 1.0f;
     float WalkModifyerSpread = 1.0f;
+    float CrouchModifyer = 1.0f;
 
     float GetShotOffset();
     virtual void SetShotOffset(float NewOffset);

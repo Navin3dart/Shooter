@@ -72,6 +72,9 @@ public:
     FVector GetMuzzleSoketLocation() const;
     void Walk();
 
+    UPROPERTY(BlueprintReadOnly, Category = "Movement")
+    bool CharacterCrouched = false;
+
 
 private:
 
@@ -86,6 +89,7 @@ private:
     void MoveForward(float Amount);
     void MoveRight(float Amount);
     void Run();
+    void Crouch();
 
 
     void Aiming(bool IsAiming);

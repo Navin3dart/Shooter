@@ -20,6 +20,8 @@ struct FWeaponData
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     UAnimMontage* ReloadAnimMontage;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    UAnimMontage* FiringAnimMontage;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -36,6 +38,8 @@ public:
     void Reload();
     void DetachWeapons();
     void Aiming(bool IsAiming);
+    void Crouch(bool IsCrouch);
+    void PlayRecoil();
 
     bool GetWeaponUIData(FWeaponUIData& UIData) const;
     bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
@@ -102,6 +106,9 @@ private:
 
     UPROPERTY()
     UAnimMontage* CurrentReloadAnimMontage = nullptr;
+
+    UPROPERTY()
+    UAnimMontage* CurrentRecoilAnimMontage = nullptr;
 
 
     bool EqipAnimInProgress = false;

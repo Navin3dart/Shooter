@@ -103,8 +103,7 @@ void AShooterBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &UShooterWeaponComponent::StopFire);
     PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::NextWeapon);
     PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &UShooterWeaponComponent::Reload);
-    //PlayerInputComponent->BindAction("Aiming", IE_Released, this, &AShooterBaseCharacter::EndAiming);
-    //PlayerInputComponent->BindAction("Aiming", IE_Pressed, this, &AShooterBaseCharacter::StartAiming);
+    PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AShooterBaseCharacter::Crouch);
 
     DECLARE_DELEGATE_OneParam(FAimingInputSignature, bool);
     PlayerInputComponent->BindAction<FAimingInputSignature>("Aiming", IE_Released, this, &AShooterBaseCharacter::Aiming, true);
@@ -140,7 +139,7 @@ void AShooterBaseCharacter::MoveRight(float Amount)
 
 void AShooterBaseCharacter::Run() 
 {
-    if (!GetVelocity().IsZero())
+    if (!GetVelocity().IsZero() && !CharacterCrouched)
     {
         if (!(FMath::IsNearlyEqual(HealthComponent->Stamina, 0)))
         {
@@ -149,6 +148,21 @@ void AShooterBaseCharacter::Run()
             TargetSpeed = RunSpeed;
         }
     }
+}
+
+void AShooterBaseCharacter::Crouch() 
+{
+    if (CharacterCrouched)
+    {
+        WeaponComponent->Crouch(CharacterCrouched);
+        CharacterCrouched = false;
+    }
+    else
+    {
+        WeaponComponent->Crouch(CharacterCrouched);
+        CharacterCrouched = true;
+    }
+
 }
 
 void AShooterBaseCharacter::Walk() 

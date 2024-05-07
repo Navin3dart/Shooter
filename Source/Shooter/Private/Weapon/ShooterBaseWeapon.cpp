@@ -10,6 +10,7 @@
 #include "NiagaraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/ShooterBaseCharacter.h"
+#include "component/ShooterWeaponComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
@@ -113,6 +114,10 @@ void AShooterBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStar
     {
         SpreadData.CurrentSpread = FMath::Clamp(SpreadData.CurrentSpread + SpreadData.DeltaSpread,  //
             SpreadData.MinSpreadCurrent, SpreadData.MaxSpreadCurrent);
+        const auto ComponentW = GetOwner()->GetComponentByClass(UShooterWeaponComponent::StaticClass());
+        const auto WeaponComponent = Cast<UShooterWeaponComponent>(ComponentW);
+
+        WeaponComponent->PlayRecoil();
     }
 }
 
@@ -180,8 +185,8 @@ void AShooterBaseWeapon::SimulatePhysics()
 
 void AShooterBaseWeapon::UpdateSpreadRadius()
 {
-    SpreadData.MinSpreadCurrent = SpreadData.MinSpread * SpreadAiming * WalkModifyerSpread;
-    SpreadData.MaxSpreadCurrent = SpreadData.MaxSpread * SpreadAiming * WalkModifyerSpread;
+    SpreadData.MinSpreadCurrent = SpreadData.MinSpread * SpreadAiming * WalkModifyerSpread * CrouchModifyer;
+    SpreadData.MaxSpreadCurrent = SpreadData.MaxSpread * SpreadAiming * WalkModifyerSpread * CrouchModifyer;
 }
 
 bool AShooterBaseWeapon::CanReload() const
