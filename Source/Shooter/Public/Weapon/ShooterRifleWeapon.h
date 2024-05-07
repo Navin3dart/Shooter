@@ -25,6 +25,7 @@ public:
 
     virtual void Tick(float DeltaTime) override;
 
+    virtual void SetShotOffset(float NewOffset);
 
 protected:
     virtual void BeginPlay() override;
@@ -36,13 +37,16 @@ protected:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UShooterWeaponVFXComponent* ShooterVFXComponent;
 
-
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon|ShotAimOffset")
+    float ShotOffset = 0.1f;
 
 private:
     FTimerHandle ShotTimerHandle;
 
     UPROPERTY()
     UNiagaraComponent* MuzzleVFXComponent;
+
+
 
     void InitMuzzleVFX();
     void SetMuzzleVFXVisibility(bool Visibility);

@@ -66,7 +66,7 @@ void AShooterBaseCharacter::BeginPlay()
 void AShooterBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-    UE_LOG(LogShooter, Display, TEXT("%f"), HealthComponent->Stamina);
+    //UE_LOG(LogShooter, Display, TEXT("%f"), HealthComponent->Stamina);
     if (!(FMath::IsNearlyEqual(TargetSpeed, CurrentSpeed, 0.1)))
     {
         CurrentSpeed = FMath::FInterpTo(CurrentSpeed, TargetSpeed, DeltaTime, InterpSpeed);

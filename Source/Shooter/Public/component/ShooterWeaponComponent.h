@@ -59,6 +59,14 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AIMING")
     float GetAimingOffsetY() const;
 
+    void CalculateAimingOffset();
+
+    FVector2d GetHitWeaponLocationOnScreen();
+
+    FVector2d ScreenLocation;
+
+    float ShotOffset;
+
 protected:
 
 	virtual void BeginPlay() override;

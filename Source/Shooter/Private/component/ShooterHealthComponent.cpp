@@ -68,14 +68,11 @@ void UShooterHealthComponent::TimerStaminaRegeneration()
 void UShooterHealthComponent::TimerStaminaDecrease() 
 {
     SetStamina(Stamina - DecreaseStaminaPerSecond*0.1f);
-    if (FMath::IsNearlyEqual(Stamina, 0.0f))
+    const auto Player = Cast<AShooterBaseCharacter>(GetOwner());
+    if ((FMath::IsNearlyEqual(Stamina, 0.0f)) || !(Player->GetVelocity().Length() > 0.0f))
     {
-        GetWorld()->GetTimerManager().ClearTimer(TimerHandleDecreaseStamina);
-
-        const auto Player = Cast<AShooterBaseCharacter>(GetOwner());
-        if (!Player) return;
         Player->Walk();
-
+        StopRunStamina();
     }
 }
 

@@ -29,5 +29,8 @@ protected:
 private:
     void DrawCrossHair();
 
+    float XPosition;
+    float YPosition;
+
 	
 };

@@ -84,6 +84,18 @@ bool UShooterPlayerHUDWidget::Initialize()
     return Super::Initialize();
 }
 
+FVector2d UShooterPlayerHUDWidget::GetCurrentCrossHairPosition()
+{
+    const auto Player = GetOwningPlayerPawn();
+    if (!Player) return {0, 0};
+
+    const auto Component = Player->GetComponentByClass(UShooterWeaponComponent::StaticClass());
+    const auto WeaponComponent = Cast<UShooterWeaponComponent>(Component);
+    if (!WeaponComponent) return {0, 0};
+
+    return WeaponComponent->GetHitWeaponLocationOnScreen();
+}
+
 UShooterHealthComponent* UShooterPlayerHUDWidget::GetHealthComponent() const
 {
     const auto Player = GetOwningPlayerPawn();

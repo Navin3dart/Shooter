@@ -6,6 +6,7 @@
 #include "Animations/ShooterEquipFinishedAnimNotify.h"
 #include "Animations/ShooterReloadFinishedAnimNotify.h"
 #include "Weapon/ShooterBaseWeapon.h"
+#include "Kismet/KismetMathLibrary.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All)
 
@@ -229,6 +230,7 @@ void UShooterWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
     if (CurrentWeapon)
     {
+        GetHitWeaponLocationOnScreen();
         UpdateSpreadRadiusForSpeed();
         CurrentWeapon->UpdateSpreadRadius();
     }
@@ -255,7 +257,7 @@ void UShooterWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType
             {
                 HitLocation = WeaponHitResult.ImpactPoint;
             }
-            FVector2d ScreenLocation;
+            //FVector2d ScreenLocation;
             FVector ImpictLoaction = WeaponHitResult.ImpactPoint;
             bool LocationIsScreen = Controller->ProjectWorldLocationToScreen(HitLocation, ScreenLocation);
             if (LocationIsScreen)
@@ -286,7 +288,7 @@ void UShooterWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType
                 }
                 MultiplayerX = MultiplayerX + OffsetX * FMath::Clamp(CorrectionParam.X, 0.0f, 1.0f);
                 MultiplayerY = MultiplayerY + OffsetY * FMath::Clamp(CorrectionParam.Y, 0.0f, 1.0f);
-
+                CalculateAimingOffset();
                 //UE_LOG(LogWeaponComponent, Display, TEXT("%f"), NormilizeScreenLocation.X);
                 //UE_LOG(LogWeaponComponent, Display, TEXT("%s"), (IsXTop ? TEXT("true"): TEXT("false")));
                 //UE_LOG(LogWeaponComponent, Display, TEXT("%f"), MultiplayerX);
@@ -305,6 +307,18 @@ float UShooterWeaponComponent::GetAimingOffsetX() const
 float UShooterWeaponComponent::GetAimingOffsetY() const
 {
     return MultiplayerY;
+}
+
+void UShooterWeaponComponent::CalculateAimingOffset() 
+{
+    MultiplayerY = MultiplayerY + CurrentWeapon->GetShotOffset();
+    CurrentWeapon->SetShotOffset(0.0f);
+}
+
+FVector2d UShooterWeaponComponent::GetHitWeaponLocationOnScreen() 
+{
+    //UE_LOG(LogWeaponComponent, Display, TEXT("%s"), *ScreenLocation.ToString());
+    return ScreenLocation;
 }
 
 bool UShooterWeaponComponent::CanReload() const

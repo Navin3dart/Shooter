@@ -36,6 +36,11 @@ void AShooterRifleWeapon::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
+void AShooterRifleWeapon::SetShotOffset(float NewOffset) 
+{
+    Super::SetShotOffset(NewOffset);
+}
+
 void AShooterRifleWeapon::BeginPlay() 
 {
     Super::BeginPlay();
@@ -59,6 +64,7 @@ void AShooterRifleWeapon::MakeShot()
 
     FHitResult HitResult;
     MakeHit(HitResult, TraceStart, TraceEnd);
+    SetShotOffset(ShotOffset);
 
     if (HitResult.bBlockingHit)
     {
@@ -66,6 +72,7 @@ void AShooterRifleWeapon::MakeShot()
         //DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
         //DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
         HitResult.GetActor()->TakeDamage(WeaponDamage, FDamageEvent{}, GetPlayerController(), this);
+
 
         ShooterVFXComponent->PlayImpactVFX(HitResult);
     }

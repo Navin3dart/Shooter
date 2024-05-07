@@ -104,6 +104,9 @@ public:
     float SpreadAiming = 1.0f;
     float WalkModifyerSpread = 1.0f;
 
+    float GetShotOffset();
+    virtual void SetShotOffset(float NewOffset);
+
 protected:
 
     	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
@@ -138,7 +141,7 @@ protected:
     bool GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
     bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
   
-
+    float ShotOffset;
 
 
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);

@@ -20,7 +20,6 @@ void AShooterGameHUD::BeginPlay()
     {
         PlayerHUDWidget->AddToViewport();
     }
-
 }
 
 void AShooterGameHUD::DrawCrossHair()
@@ -29,7 +28,9 @@ void AShooterGameHUD::DrawCrossHair()
     const float HalfLineSize = 10.0f;
     const float LineThickness = 1.0f;
     const FLinearColor LineColor = FLinearColor::Black;
-    float Offset = (PlayerHUDWidget->GetWeaponSpreadRadius())*25.0f;
+    float Offset = (PlayerHUDWidget->GetWeaponSpreadRadius()) * 25.0f;
+    FVector2d CurrentCrosshairPosition = PlayerHUDWidget->GetCurrentCrossHairPosition();
+    // UE_LOG(LogTemp, Display, TEXT("%s"), *CurrentCrosshairPosition.ToString());
 
     DrawLine(Center.Min - HalfLineSize - Offset,  // Start X
         Center.Max,                               // Start Y
@@ -49,4 +50,10 @@ void AShooterGameHUD::DrawCrossHair()
         Center.Max + HalfLineSize + Offset,       // End Y
         LineColor,                                //
         LineThickness);                           //
+    DrawLine(CurrentCrosshairPosition.X,          //
+        CurrentCrosshairPosition.Y,               //
+        CurrentCrosshairPosition.X,               //
+        CurrentCrosshairPosition.Y,               //
+        FColor::Red,                              //
+        LineThickness * 3);                       //
 }

@@ -41,7 +41,7 @@ public:
 
     virtual bool Initialize() override;
 
-
+    FVector2d GetCurrentCrossHairPosition();
 
 private:
 

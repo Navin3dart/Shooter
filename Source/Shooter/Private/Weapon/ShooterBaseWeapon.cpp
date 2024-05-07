@@ -9,6 +9,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/ShooterBaseCharacter.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
@@ -61,15 +62,35 @@ FVector AShooterBaseWeapon::GetMuzzleWorldLocation() const
     return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 }
 
+float AShooterBaseWeapon::GetShotOffset()
+{
+    return ShotOffset;
+}
+
+void AShooterBaseWeapon::SetShotOffset(float NewOffset) 
+{
+    ShotOffset = NewOffset;
+    const auto ShooterCharacter = Cast<AShooterBaseCharacter>(GetOwner());
+    if (!ShooterCharacter) return;
+    ShooterCharacter->AddControllerPitchInput(-NewOffset/5.0f);
+
+}
+
+
+
 bool AShooterBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 {
+    if (!GetWorld()) return false;
     FVector ViewLocation;
     FRotator ViewRotation;
     if (!GetPlayerViewPoint(ViewLocation, ViewRotation)) return false;
 
-    TraceStart = ViewLocation;
+    //TraceStart = ViewLocation;
+    TraceStart = GetMuzzleWorldLocation();
     const auto HalfRad = FMath::DegreesToRadians(SpreadData.CurrentSpread);
-    const FVector ShotDirection = FMath::VRandCone(ViewRotation.Vector(), HalfRad);
+    //const FVector ShotDirection = FMath::VRandCone(ViewRotation.Vector(), HalfRad);
+    const FVector MuzzleDirection = WeaponMesh->GetSocketTransform(MuzzleSocketName).GetRotation().GetForwardVector();
+    const FVector ShotDirection = FMath::VRandCone(MuzzleDirection, HalfRad);
     TraceEnd = TraceStart + ShotDirection * TraceMaxDistance;
     return true;
 }
